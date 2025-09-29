@@ -1,15 +1,15 @@
 const Header = ({course}) => {
   return (<h1>{course}</h1>)
 }
-const Part = ({parts}) => {
-  return (<p>{parts.name} {parts.exercises}</p>)
+const Part = ({part_name, exercises}) => {
+  return (<p>{part_name} {exercises}</p>)
 }
 const Content = ({parts}) => {
   return (
   <div>
-    <Part name={parts[0].name} exercises={parts[0].exercises}/>
-    <Part name={parts[1].name} exercises={parts[1].exercises}/>
-    <Part name={parts[2].name} exercises={parts[2].exercises}/>
+    <Part part_name={parts[0].name} exercises={parts[0].exercises}/>
+    <Part part_name={parts[1].name} exercises={parts[1].exercises}/>
+    <Part part_name={parts[2].name} exercises={parts[2].exercises}/>
   </div>
   )
 }
