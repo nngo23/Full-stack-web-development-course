@@ -2,7 +2,7 @@ const Header = ({course}) => {
   return (<h1>{course}</h1>)
 }
 const Part = ({parts}) => {
-  return (<p>{part_name} {exercises}</p>)
+  return (<p>{parts.name} {parts.exercises}</p>)
 }
 const Content = ({parts}) => {
   return (
