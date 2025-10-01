@@ -1,5 +1,5 @@
 const Header = ({course}) => {
-  return (<h1>{course}</h1>)
+  return (<h1>{course.name}</h1>)
 }
 const Part = ({part_name, exercises}) => {
   return (<p>{part_name} {exercises}</p>)
@@ -40,7 +40,7 @@ const App = () => {
   }
   return (
     <div>
-      <Header course = {course.name}/>
+      <Header course = {course}/>
       <Content course = {course}/>
       <Total course = {course}/>
     </div>  
