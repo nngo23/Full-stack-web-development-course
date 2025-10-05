@@ -12,7 +12,7 @@ const App = () => {
   
   const StatisticLine = ({text,value}) => <tr> <td>{text}</td> <td>{value}</td> </tr>
 
-  const Statistics = ({}) => {
+  const Statistics = () => {
     return (
       <div>
         {good + neutral + bad === 0 ? (
