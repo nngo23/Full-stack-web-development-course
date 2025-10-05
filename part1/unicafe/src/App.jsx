@@ -9,7 +9,19 @@ const App = () => {
   const Total = ({}) => <div>all {good + neutral + bad}</div>
   const Average = ({}) => <div>average {(good*1 + neutral*0 + bad*(-1))/(good+neutral+bad)}</div>
   const Positive = ({}) => <div> positive {(good*100)/(good+neutral+bad)} %</div>
-  
+  const Statistics = ({}) => {
+    return (
+      <div>
+        <div> good {good}  </div>
+        <div> neutral {neutral} </div>
+        <div> bad {bad} </div>
+        <Total /> 
+        <Average />
+        <Positive />
+      </div>
+    )
+  }
+
   return (
     <div>
       <h1>give feedback</h1>
@@ -24,14 +36,7 @@ const App = () => {
       </button>
 
       <h2>statistics</h2>
-      <p>
-        good {good} <br />
-        neutral {neutral} <br />
-        bad {bad} <br />
-        <Total /> 
-        <Average />
-        <Positive />
-      </p>
+      <Statistics />
     </div>
   )
 }
