@@ -12,12 +12,18 @@ const App = () => {
   const Statistics = ({}) => {
     return (
       <div>
-        <div> good {good}  </div>
-        <div> neutral {neutral} </div>
-        <div> bad {bad} </div>
-        <Total /> 
-        <Average />
-        <Positive />
+        {good + neutral + bad === 0 ? (
+          <div> No feedback given </div>
+         ) : (
+            <>
+              <div> good {good}  </div>
+              <div> neutral {neutral} </div>
+              <div> bad {bad} </div>
+              <Total /> 
+              <Average />
+              <Positive />
+          </>
+         )}
       </div>
     )
   }
