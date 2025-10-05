@@ -8,11 +8,11 @@ const App = () => {
 
   const Button = ({handleClick,text}) => <button onClick={handleClick}>{text}</button>
 
-  const Total = ({}) => <div>all {good + neutral + bad}</div>
-  const Average = ({}) => <div>average {(good*1 + neutral*0 + bad*(-1))/(good+neutral+bad)}</div>
-  const Positive = ({}) => <div> positive {(good*100)/(good+neutral+bad)} %</div>
+  const Total = ({}) => <tr> <td> all </td> <td>{good + neutral + bad}</td> </tr>
+  const Average = ({}) => <tr> <td> average </td> <td>{((good*1 + neutral*0 + bad*(-1))/(good+neutral+bad)).toFixed(1)}</td> </tr>
+  const Positive = ({}) => <tr> <td> positive </td> <td>{((good*100)/(good+neutral+bad)).toFixed(1)} % </td> </tr>
   
-  const StatisticLine = ({text,value}) => <div>{text} {value}</div>
+  const StatisticLine = ({text,value}) => <tr> <td>{text}</td> <td>{value}</td> </tr>
 
   const Statistics = ({}) => {
     return (
