@@ -11,11 +11,15 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    if (!newName) return 
-      const newPerson = {id: persons.length + 1, name: newName}
-      setPersons([...persons,newPerson])
+    const overlappedName = persons.some((p) => newName.trim().toLowerCase() === p.name.trim().toLowerCase())
+    if (overlappedName) {
+      alert(`${newName} is already added to phonebook`)
+    } else {
+      const newPerson = {id: String(persons.length + 1), name: newName}
+      setPersons(persons.concat(newPerson))
       setNewName('')
     }
+  }
 
   return (
     <div>
@@ -24,7 +28,7 @@ const App = () => {
         <div>
         name: <input 
                 value={newName} 
-                onChange={(e) => setNewName(e.target.value)}
+                onChange={(event) => setNewName(event.target.value)}
               />
         </div>
         <div>
