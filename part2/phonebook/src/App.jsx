@@ -60,6 +60,9 @@ const App = () => {
       setNewNumber('')
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
+    .catch(error => {
+      showNotification({type: 'error', message: `Failed to add ${newPerson.name}`})
+    })
   }
     
   
