@@ -21,24 +21,19 @@
       "id": "4"
     },
     {
-      "id": "5db4",
-      "name": "Anna",
-      "number": "06548252"
-    },
-    {
-      "id": "10cb",
-      "name": "Andrew",
-      "number": "9875433776"
-    },
-    {
-      "id": "05d1",
-      "name": "Babay",
-      "number": "2167800"
-    },
-    {
       "id": "6162",
       "name": "Peter",
-      "number": "12-345678"
+      "number": "123445"
+    },
+    {
+      "id": "8859",
+      "name": "Babara",
+      "number": "3567788"
+    },
+    {
+      "id": "de09",
+      "name": "Anna",
+      "number": ""
     }
   ]
 }

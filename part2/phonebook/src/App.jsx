@@ -10,7 +10,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filteredName, setFiltered] = useState('')
-
+ 
   useEffect(() => {
     personsServices
     .getAll()
@@ -23,10 +23,26 @@ const App = () => {
   
   const addName = (event) => {
     event.preventDefault()
-    const overlappedName = persons.some((p) => newName.trim().toLowerCase() === p.name.trim().toLowerCase())
-    if (overlappedName) {
-      alert(`${newName} is already added to phonebook`)
-    } 
+    const existingPerson = persons.find(p => newName.trim().toLowerCase() === p.name.trim().toLowerCase())
+    if (existingPerson) {
+      const confirmUpdate = window.confirm(`${existingPerson.name} is already added to phonebook, replace the old number with a new one?`)
+      if (confirmUpdate) {
+        const updatedPerson =  {... existingPerson, number: newNumber}
+        personsServices
+        .update(existingPerson.id, updatedPerson).then(returnedPerson => {
+        setPersons(persons.map(p => p.id === existingPerson.id ? returnedPerson : p))
+        setNewName('')
+        setNewNumber('')
+        })
+        .catch(error => {
+          alert(`Information of ${existingPerson.name} was already deleted from server`)
+          setPersons(persons.filter(p => p.id !== existingPerson.id))
+        })
+        return
+      }
+    return
+    }
+    
     const newPerson = {name: newName, number: newNumber}
     personsServices
     .create(newPerson)
@@ -36,11 +52,30 @@ const App = () => {
       setNewNumber('')
     })
   }
+    
+  
+
+  const deleteName = (id, name) => {
+    if (window.confirm(`Delete ${name}?`)) {
+      personsServices
+      .remove(id)
+      .then(() => setPersons(persons.filter(p => p.id !== id)))
+      .catch(error => {
+        alert(
+          `Information of ${name} was already deleted from server`
+        )
+        setPersons(persons.filter(p => p.id !== id))
+      })
+    }
+    
+  }
+
+
 
   const handleNewName = (e) => setNewName(e.target.value)
   const handleNewNumber = (e) => setNewNumber(e.target.value)
   const handleFilteredName = (e) => setFiltered(e.target.value)
-
+ 
   return (
     <div>
       <h2>Phonebook</h2>
@@ -55,7 +90,8 @@ const App = () => {
         handleNewNumber={handleNewNumber}       
       />
       <h3>Numbers</h3>
-      <Persons personToShow={personToShow}/>
+      <Persons personToShow={personToShow} deleteName={deleteName}/>
+
     </div>
   )
 }
