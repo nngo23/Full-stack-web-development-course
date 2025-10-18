@@ -23,7 +23,7 @@ const App = () => {
 
   const showNotification = ({type,message}) => {
     setNotification({type,message})
-    setTimeout (() => {setNotification({type:'',message:null})}, 5000)
+    setTimeout (() => {setNotification({type:'',message:null})}, 6000)
   }
   const personToShow = persons.filter(person => person.name.trim().toLowerCase().includes(filteredName.toLowerCase()))
   
