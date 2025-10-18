@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import axios from 'axios'
+import {useState, useEffect} from 'react'
+import personsServices from './services/personss'
 
 import Filter from './components/filter'
 import PersonForm from './components/PersonForm'
@@ -12,11 +12,10 @@ const App = () => {
   const [filteredName, setFiltered] = useState('')
 
   useEffect(() => {
-  console.log('effect')
-  axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      setPersons(response.data)
+    personsServices
+    .getAll()
+    .then(firstPersons => {
+      setPersons(firstPersons)
     })
   }, [])
 
@@ -27,12 +26,15 @@ const App = () => {
     const overlappedName = persons.some((p) => newName.trim().toLowerCase() === p.name.trim().toLowerCase())
     if (overlappedName) {
       alert(`${newName} is already added to phonebook`)
-    } else {
-      const newPerson = {id: String(persons.length + 1), name: newName, number: newNumber}
-      setPersons(persons.concat(newPerson))
+    } 
+    const newPerson = {name: newName, number: newNumber}
+    personsServices
+    .create(newPerson)
+    .then(addedPerson => {
+      setPersons(persons.concat(addedPerson))
       setNewName('')
       setNewNumber('')
-    }
+    })
   }
 
   const handleNewName = (e) => setNewName(e.target.value)
