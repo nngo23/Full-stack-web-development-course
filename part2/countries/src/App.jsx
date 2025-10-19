@@ -9,8 +9,7 @@ const App = () => {
   const [countries, setCountries] = useState([]) 
   //const [newName, setNewName] = useState('')
   const [filteredName, setFiltered] = useState('')
- 
- 
+   
   useEffect(() => {
   CountriesServices
     .getAll()
@@ -34,7 +33,7 @@ const App = () => {
   //}
   //const handleNewName = (e) => setNewName(e.target.value)
   const handleFilteredName = (e) => setFiltered(e.target.value)
- 
+  
   return (
     <div>
       <Filter filteredName={filteredName} handleFilteredName={handleFilteredName} />
