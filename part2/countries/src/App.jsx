@@ -1,34 +1,45 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {useState, useEffect} from 'react'
+import countriesService from './services/countries'
 
-function App() {
-  const [count, setCount] = useState(0)
+import Filter from './components/filter'
+//import CountryForm from './components/CountryForm'
+import Countries from './components/countries'
 
+const App = () => {
+  const [countries, setCountries] = useState([]) 
+  //const [newName, setNewName] = useState('')
+  const [filteredName, setFiltered] = useState('')
+ 
+ 
+  useEffect(() => {
+  countriesServices
+    .getAll()
+    .then(allCountries => {
+      setCountries(allCountries)
+    })
+  }, [])
+
+  const countriesToShow = countries.filter(country => country.name.common.trim().toLowerCase().includes(filteredName.toLowerCase()))
+  
+
+  //const addName = (event) => {
+   // event.preventDefault()
+    //const newCountry = {name: newName}
+    //countriesServices
+   // .create(newCountry)
+   // .then(addedCountries => {
+     // setCountries(newCountry.concat(addedCountries))
+      //setNewName('')
+    //})
+  //}
+  //const handleNewName = (e) => setNewName(e.target.value)
+  const handleFilteredName = (e) => setFiltered(e.target.value)
+ 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <div>
+      <Filter filteredName={filteredName} handleFilteredName={handleFilteredName} />
+      <Countries countriesToShow={countriesToShow}/>
+    </div>
   )
 }
 
