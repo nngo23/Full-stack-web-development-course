@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react'
-import countriesService from './services/countries'
 
 import Filter from './components/filter'
 //import CountryForm from './components/CountryForm'
 import Countries from './components/countries'
+import CountriesServices from './services/countriess'
 
 const App = () => {
   const [countries, setCountries] = useState([]) 
@@ -12,9 +12,9 @@ const App = () => {
  
  
   useEffect(() => {
-  countriesServices
+  CountriesServices
     .getAll()
-    .then(allCountries => {
+    .then((allCountries) => {
       setCountries(allCountries)
     })
   }, [])
