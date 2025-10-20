@@ -1,6 +1,24 @@
-import {useState} from "react"
+import {useState, useEffect} from "react"
+import axios from "axios"
+
 const Countries = ({countriesToShow}) => {
     const [showCountry, setShowCountry] = useState('')
+    const [weather, setWeather] = useState('')
+    const api_key = import.meta.env.VITE_SOME_KEY
+    const country = (countriesToShow.length === 1) ? countriesToShow[0] : showCountry
+    useEffect(() => {
+        if (!country) return
+        const capital = country.capital?.[0] || ""
+        if (!capital || !api_key) return
+        axios
+            .get(
+                `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(
+                    capital)}&units=metric&appid=${api_key}`)
+            .then((response) => {
+            setWeather(response.data)
+            })
+    }, [country,api_key]);
+
     if (!countriesToShow || countriesToShow.length === 0) {
         return <p>No countries found</p>
     }
@@ -19,7 +37,6 @@ const Countries = ({countriesToShow}) => {
         )
     }
     if (countriesToShow.length === 1 || showCountry) {
-        const country = (countriesToShow.length === 1) ? countriesToShow[0] : showCountry
         return (
             <div>
             <h2>{country.name.common}</h2>
@@ -32,7 +49,16 @@ const Countries = ({countriesToShow}) => {
                 ))}
                 </ul>
             <img src={country.flags.png} width="200"/>
-            <p />  
+           
+            {country && weather && weather.main && (  
+                <div>
+                <h3>Weather in {country.capital}</h3>
+                <p>Temperature: {weather.main.temp} Celsius</p>
+                <img
+                src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}/>
+                <p>Wind: {weather.wind.speed} m/s</p>
+                </div>
+            )}
             {showCountry && (
                 <button onClick={() => setShowCountry(null)}>Back to list</button>
             )}
