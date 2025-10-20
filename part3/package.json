@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
+    "dev": "node --watch index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/nngo23/Full-stack-web-development-course/issues"
   },
-  "homepage": "https://github.com/nngo23/Full-stack-web-development-course/tree/main#readme"
+  "homepage": "https://github.com/nngo23/Full-stack-web-development-course/tree/main#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
