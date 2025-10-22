@@ -60,8 +60,10 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
+  console.log('Request to delete id:', request.params.id)
   Person.findByIdAndDelete(request.params.id)
     .then(person => {
+      console.log('Deleted person:', person)
       if (person) {
         response.status(204).end()
       } else {
