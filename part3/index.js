@@ -32,6 +32,20 @@ app.post('/api/persons', (request, response, next) => {
   }  
 ) 
 
+app.put('/api/persons/:id', (request, response, next) => {
+  const {name, number} = request.body
+
+  Person.findById(request.params.id)
+    .then(person => {
+      if (!person) {return response.status(404).end()}
+      person.name = name
+      return person.save().then((updatedPerson) => {
+        response.json(updatedPerson)
+      })
+    })
+    .catch(error => next(error))
+})
+
 app.delete('/api/persons/:id', (request, response, next) => {
   Person.findByIdAndDelete(request.params.id)
     .then(person => {
