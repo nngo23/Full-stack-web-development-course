@@ -31,11 +31,16 @@ app.post('/api/persons', (request, response) => {
     response.json(saved_person) ) }  
 ) 
 
-app.delete('/api/persons/:id', (request, response) => { 
-  Person.findByIdAndDelete(request.params.id) 
-  .then(() => response.status(204).end()) 
-  .catch(error => response.status(500).json({ error: 'server error' })) })
-
+app.delete('/api/persons/:id', (req, res, next) => {
+  Person.findByIdAndDelete(req.params.id)
+    .then(person => {
+      if (person) {
+        res.status(204).end()
+      } else {
+        res.status(404).json({ error: 'person not found' })
+      }
+    })
+})
   
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
