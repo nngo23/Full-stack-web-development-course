@@ -5,6 +5,7 @@
 *.docx
 *.txt
 *.test
+*.env
 
 # Ignoring the whole folder and all its content 
 /screen_captures
