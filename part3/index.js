@@ -21,34 +21,29 @@ app.get('/api/persons', (request, response) => {
   })
 })
 
-app.post('/api/persons', async (request, response, next) => {
-  const { name, number } = request.body
-
+app.post('/api/persons', (request, response) => {
+  const {name, number}=request.body
   if (!name || !number) {
-    return response.status(400).json({ error: 'name or number missing' })
+    return response.status(400).json({error: 'name or number missing'}) 
+  }      
+  const person = new Person({name, number})
+  person.save().then(saved_person =>
+    response.json(saved_person)
+  )
+})    
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = request.params.id
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return response.status(400).json({ error: 'malformatted id' })
   }
 
-  try {
-    const person = new Person({ name, number })
-    const savedPerson = await person.save()
-    response.json(savedPerson)
-  } catch (error) {
-    console.error('Save error:', error.message)
-    next(error)
-  }
-}) 
-
-app.delete('/api/persons/:id', async (request, response, next) => {
-  try {
-    const result = await Person.findByIdAndDelete(request.params.id)
-    if (!result) {
-      return response.status(404).json({ error: 'person not found' })
-    }
-    response.status(204).end()
-  } catch (error) {
-    console.error('Delete error:', error.message)
-    next(error)
-  }
+  Person.findByIdAndDelete(id)
+    .then(() => {
+      if () response.status(204).end()
+      else response.status(404).json({ error: 'person not found' })
+    })
+    .catch(error => response.status(500).json({ error: 'server error' }))
 })
 
 const PORT = process.env.PORT || 3001
