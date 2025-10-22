@@ -40,6 +40,7 @@ app.delete('/api/persons/:id', (req, res, next) => {
         res.status(404).json({ error: 'person not found' })
       }
     })
+    .catch(error => next(error))
 })
   
 const PORT = process.env.PORT || 3001
