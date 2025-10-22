@@ -20,6 +20,18 @@ app.get('/api/persons', (request, response, next) => {
     .catch(next)
 })
 
+app.get('/api/persons/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person)
+      } else {
+        response.status(404).json({error: 'Not found person'})
+      }
+    })
+    .catch(next)
+})
+
 app.post('/api/persons', (request, response, next) => {
   const {name, number}=request.body 
   if (!name || !number) { 
@@ -48,13 +60,24 @@ app.put('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  Person.findByIdAndDelete(request.params.id)
+  Person.findById(request.params.id)
     .then(person => {
       if (person) {
         response.status(204).end()
       } else {
-        response.status(404).json({ error: 'person not found' })
+        response.status(404).json({error: 'Not found person'})
       }
+    })
+    .catch(next)
+})
+
+app.get('/info', (request, response, next) => {
+  Person.countDocuments()
+    .then(total => {
+      const now = new Date()
+      response.send(
+        `<p>Phonebook contains ${total} people</p><p>${now}</p>`
+      )
     })
     .catch(next)
 })
