@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const Person = require('./models/person')
 
 if (process.argv.length <3) {
   console.log('Please give the password as argument')
@@ -9,28 +9,14 @@ const password = process.argv[2]
 const name = process.argv[3]
 const number = process.argv[4]
 
-const encodedPassword = encodeURIComponent(password)
-const url = `mongodb+srv://fullstack:${encodedPassword}@cluster01.aai9gm9.mongodb.net/?retryWrites=true&w=majority&appName=Cluster01`
-
-mongoose.set('strictQuery',false)
-
-mongoose.connect(url)
-
-const personSchema = new mongoose.Schema({
-  name: String,
-  number: String,
-})
-
-const Person = mongoose.model('Person', personSchema)
 
 if (process.argv.length === 5) {
     const person = new Person({name, number})
     person.save().then(persons => {
         console.log(`added ${name} number ${number} to phonebook`)
-    mongoose.connection.close()
+        process.exit()
     })
-} else {
-    if (!name || !number) {
+} else if (!name && !number) {
         Person.find({}).then(persons => {
         console.log('phonebook:')
         persons.forEach(person => {
@@ -39,5 +25,8 @@ if (process.argv.length === 5) {
         mongoose.connection.close()
         })
     }
+else {
+  console.log('Please provide name and number to add new entry')
+  process.exit(1)    
 }
 

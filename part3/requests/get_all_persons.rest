@@ -1,3 +1,8 @@
-DELETE https://phonebook-backend-7ar1.onrender.com/api/persons/4
+POST https://phonebook-backend-7ar1.onrender.com/api/persons
+Content-Type: application/json
 
+{
+    "name": "Peter Pan",
+    "number": "4336748"
+}
 
