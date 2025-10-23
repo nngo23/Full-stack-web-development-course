@@ -24,18 +24,34 @@ const App = () => {
     setTimeout(() => setNotification({ type: '', message: null }), 6000)
   }
 
-  const handleBackendError = (error, fallbackMessage) => {
-    console.log('🔥 Full Axios error:', error)
-    console.log('🔥 error.response:', error.response)
-    console.log('🔥 error.response.data:', error.response?.data)
+    console.log('🔥 handleBackendError called!')
+  console.log('🔥 Full error object:', error)
 
-    let backendMessage = fallbackMessage
-    const data = error.response?.data
-    if (data?.error) backendMessage = data.error
-
-    showNotification({ type: 'error', message: backendMessage })
+  // Defensive checks so it never crashes even if response missing
+  if (!error.response) {
+    console.log('⚠️ No error.response, Axios might be failing before response.')
+    showNotification({ type: 'error', message: fallbackMessage })
+    return
   }
 
+  console.log('🔥 error.response:', error.response)
+  console.log('🔥 error.response.data:', error.response.data)
+
+  let backendMessage = fallbackMessage
+  const data = error.response.data
+
+  if (data) {
+    if (typeof data.error === 'string') {
+      backendMessage = data.error
+    } else if (Array.isArray(data.error)) {
+      backendMessage = data.error.join(', ')
+    } else if (data.message) {
+      backendMessage = data.message
+    }
+  }
+
+  showNotification({ type: 'error', message: backendMessage })
+}
   const personToShow = persons.filter(person =>
     person.name.trim().toLowerCase().includes(filteredName.toLowerCase())
   )
