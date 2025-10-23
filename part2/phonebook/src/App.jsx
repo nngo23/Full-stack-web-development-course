@@ -62,8 +62,15 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      const backendError = error.response?.data?.error
-      showNotification({ type: 'error', message: backendError ?? `Failed to add ${newPerson.name}` })
+    console.log('Axios error:', error)                 // Debug full error
+    console.log('Axios error.response:', error.response) // Debug response
+
+    const backendError = error.response?.data?.error     // Read Mongoose message
+    if (backendError) {
+      showNotification({ type: 'error', message: backendError })
+    } else {
+      showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
+    }
     })    
   }
     
