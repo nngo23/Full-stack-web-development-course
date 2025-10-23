@@ -61,10 +61,13 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      console.log(error.response.data.error)
-      const msg = error.response?.data?.error || `Could not add ${newPerson.name}`
-      showNotification({ type: 'error', message: msg })
-    })
+      const backendError = error.response?.data?.error
+      if (backendError) {
+        showNotification({ type: 'error', message: backendError })
+      } else {
+      showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
+      }
+    })    
   }
     
   
