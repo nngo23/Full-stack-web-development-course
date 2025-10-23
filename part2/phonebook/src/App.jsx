@@ -12,72 +12,49 @@ const App = () => {
   const [filteredName, setFiltered] = useState('')
   const [notification, setNotification] = useState({ type: '', message: null })
 
-  // Fetch all persons on mount
   useEffect(() => {
     personsServices.getAll()
       .then(res => setPersons(res.data))
-      .catch(err => console.error('❌ Fetch failed:', err))
+      .catch(err => console.error('Fetch failed:', err))
   }, [])
 
-  // Notification helper
   const showNotification = ({ type, message }) => {
     setNotification({ type, message })
     setTimeout(() => setNotification({ type: '', message: null }), 6000)
   }
 
-  // Filtered persons
+  const handleBackendError = (err) => {
+    console.log('❌ FULL ERROR OBJECT:', err)
+    const backendMessage = err.response?.data?.error
+    console.log('🔥 backendMessage:', backendMessage)
+    showNotification({ type: 'error', message: backendMessage || 'Unknown error' })
+  }
+
   const personToShow = persons.filter(person =>
-    person.name.trim().toLowerCase().includes(filteredName.toLowerCase())
+    person.name.toLowerCase().includes(filteredName.toLowerCase())
   )
 
-  // Add or update person
-  const addName = event => {
+  const addName = (event) => {
     event.preventDefault()
-    const presentPerson = persons.find(
-      p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
+    const existingPerson = persons.find(
+      p => p.name.toLowerCase() === newName.toLowerCase()
     )
 
-    // Update existing person
-    if (presentPerson) {
-      const confirmUpdate = window.confirm(
-        `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
-      )
-      if (confirmUpdate) {
-        const updatedPerson = { ...presentPerson, number: newNumber }
-        personsServices.update(presentPerson.id, updatedPerson)
+    if (existingPerson) {
+      if (window.confirm(`${existingPerson.name} is already added. Replace number?`)) {
+        const updatedPerson = { ...existingPerson, number: newNumber }
+        personsServices.update(existingPerson.id, updatedPerson)
           .then(res => {
-            setPersons(persons.map(p => p.id === presentPerson.id ? res.data : p))
+            setPersons(persons.map(p => p.id === existingPerson.id ? res.data : p))
             setNewName('')
             setNewNumber('')
-            showNotification({
-              type: 'success',
-              message: `Number of ${presentPerson.name} is changed`,
-            })
+            showNotification({ type: 'success', message: `Updated ${res.data.name}` })
           })
-           .catch(err => {
-    console.log('❌ FULL AXIOS ERROR OBJECT:', err)         // <-- debug
-    console.log('❌ err.response:', err.response)
-    console.log('❌ err.response.data:', err.response?.data)
-
-    let backendMessage = 'Unknown error'
-    if (err.response && err.response.data) {
-      if (typeof err.response.data.error === 'string') {
-        backendMessage = err.response.data.error
-      } else if (Array.isArray(err.response.data.error)) {
-        backendMessage = err.response.data.error.join(', ')
-      } else if (err.response.data.message) {
-        backendMessage = err.response.data.message
-      }
-    }
-
-    console.log('🔥 backendMessage to show:', backendMessage)
-    showNotification({ type: 'error', message: backendMessage })
-  })
+          .catch(handleBackendError)
       }
       return
     }
 
-    // Add new person
     const newPerson = { name: newName, number: newNumber }
     personsServices.create(newPerson)
       .then(res => {
@@ -86,16 +63,9 @@ const App = () => {
         setNewNumber('')
         showNotification({ type: 'success', message: `Added ${res.data.name}` })
       })
-      .catch(err => {
-    console.log('❌ FULL AXIOS ERROR OBJECT:', err)
-    console.log('❌ err.response:', err.response)
-    console.log('❌ err.response.data:', err.response?.data)
-    const backendMessage = err.response?.data?.error
-    showNotification({ type: 'error', message: backendMessage || 'Unknown error' })
-  })
+      .catch(handleBackendError)
   }
 
-  // Delete person
   const deleteName = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
       personsServices.remove(id)
@@ -103,11 +73,8 @@ const App = () => {
           setPersons(persons.filter(p => p.id !== id))
           showNotification({ type: 'success', message: `Deleted ${name}` })
         })
-        .catch(() => {
-          showNotification({
-            type: 'error',
-            message: `Information of ${name} was already deleted from server`,
-          })
+        .catch(err => {
+          handleBackendError(err)
           setPersons(persons.filter(p => p.id !== id))
         })
     }
@@ -116,14 +83,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {notification && notification.message && (
+      {notification.message && (
         <Notification type={notification.type} message={notification.message} />
       )}
-      <Filter
-        filteredName={filteredName}
-        handleFilteredName={e => setFiltered(e.target.value)}
-      />
-      <h3>add a new</h3>
+      <Filter filteredName={filteredName} handleFilteredName={e => setFiltered(e.target.value)} />
+      <h3>Add a new</h3>
       <PersonForm
         addName={addName}
         newName={newName}
@@ -138,3 +102,4 @@ const App = () => {
 }
 
 export default App
+
