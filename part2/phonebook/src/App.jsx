@@ -61,8 +61,8 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      console.log('Error response:', error.response);
-      const msg = error.response?.data?.error || `Could not add ${newPerson.name}`;
+      console.log(error.response.data.error)
+      const msg = error.response?.data?.error || `Could not add ${newPerson.name}`
       showNotification({ type: 'error', message: msg })
     })
   }

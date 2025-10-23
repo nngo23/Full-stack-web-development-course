@@ -5,7 +5,7 @@ const app = express()
 const Person = require('./models/person')
 app.use(cors())
 app.use(express.static('dist'))
-  app.use(express.json())
+app.use(express.json())
 morgan.token('postPerson',request => {
   if (request.method === 'POST') {
     return JSON.stringify(request.body)
@@ -17,7 +17,7 @@ app.use(morgan(
 app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(person => 
     response.json(person))
-    .catch(next)
+    .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
@@ -29,7 +29,7 @@ app.get('/api/persons/:id', (request, response, next) => {
         response.status(404).json({error: 'Not found person'})
       }
     })
-    .catch(next)
+    .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response, next) => {
@@ -57,7 +57,7 @@ app.put('/api/persons/:id', (request, response, next) => {
         response.json(updatedPerson)
       })
     })
-    .catch(next)
+    .catch(error => next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -71,7 +71,7 @@ app.delete('/api/persons/:id', (request, response, next) => {
         response.status(404).json({error: 'Not found person'})
       }
     })
-    .catch(next)
+    .catch(error => next(error))
 })
 
 app.get('/info', (request, response, next) => {
@@ -82,7 +82,7 @@ app.get('/info', (request, response, next) => {
         `<p>Phonebook contains ${total} people</p><p>${now}</p>`
       )
     })
-    .catch(next)
+    .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
@@ -93,14 +93,13 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'ValidationError') {
-    const messages = Object.values(error.errors).map(e => e.message);
-    return res.status(400).json({ error: messages.join(', ') })
+    return response.status(400).send({error: error.message})
   } 
-  next(error)
   if (error.name === 'CastError') {
     return response.status(400).send({error:'Invalid ID format'})
   }
-  return response.status(500).json({error: 'Internal server error'})
+  response.status(500).json({error: 'Internal server error'})
+  next(error)
   }
 app.use(errorHandler)
 
