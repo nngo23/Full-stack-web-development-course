@@ -13,10 +13,20 @@ const App = () => {
   const [notification, setNotification] = useState({type: '', message: null})
 
   useEffect(() => {
-    personsServices
-      .getAll()
-      .then(setPersons)
-      .catch(err => console.error('Fetch failed:', err))
+  personsServices
+    .getAll()
+    .then(firstPersons => {
+      if (Array.isArray(firstPersons)) {
+        setPersons(firstPersons)
+      } else {
+        console.error('Expected an array but got:',firstPersons)
+        setPersons([]) 
+      }
+    })
+    .catch(err => {
+      console.error('Fetch failed:', err)
+      setPersons([]) 
+    })
   }, [])
 
   const showNotification = ({type, message}) => {
