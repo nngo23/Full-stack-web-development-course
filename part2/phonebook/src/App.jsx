@@ -43,7 +43,7 @@ const App = () => {
         showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
         })
         .catch(error => {
-          const backendError = error.response?.data?.error
+          const backendError = error.response?.data?.error || error.response?.data?.message
           showNotification({ type: 'error', message: backendError ?? `Failed to update ${presentPerson.name}` })
           setPersons(persons.filter(p => p.id !== presentPerson.id))
         })
@@ -65,7 +65,7 @@ const App = () => {
     console.log('Axios error:', error)                 // Debug full error
     console.log('Axios error.response:', error.response) // Debug response
 
-    const backendError = error.response?.data?.error     // Read Mongoose message
+    const backendError = error.response?.data?.error || error.response?.data?.message     // Read Mongoose message
     if (backendError) {
       showNotification({ type: 'error', message: backendError })
     } else {
