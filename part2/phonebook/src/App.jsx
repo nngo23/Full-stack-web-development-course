@@ -43,7 +43,12 @@ const App = () => {
         showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
         })
         .catch(error => {
-          showNotification({type: 'error', message: `Information of ${presentPerson.name} was already deleted from server`})
+          const backendError = error.response?.data?.error
+          if (backendError) {
+            showNotification({ type: 'error', message: backendError })
+          } else {
+            showNotification({ type: 'error', message: `Failed to update ${presentPerson.name}` })
+          }
           setPersons(persons.filter(p => p.id !== presentPerson.id))
         })
         return
