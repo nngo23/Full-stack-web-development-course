@@ -9,23 +9,13 @@ app.use(express.json())
 
 morgan.token('postPerson',request => {
   if (request.method === 'POST') {
-    return JSON.stringify(request.body)
+      return JSON.stringify(request.body)
     } return null
 })
 app.use(morgan(
   ':method :url :status :res[content-length] - :response-time ms :postPerson'))
-  
-app.post('/api/persons', (request, response, next) => {
-  const {name, number}=request.body 
-  if (!name || !number) { 
-    return response.status(400).json({error: 'name or number missing'})
-  } 
-  const person = new Person({name, number}) 
-  person.save().then(saved_person =>
-    response.json(saved_person)) 
-    .catch(error => next(error))
-  }  
-) 
+
+
 
 
 
@@ -46,6 +36,17 @@ app.get('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => next(error))
 })
+app.post('/api/persons', (request, response, next) => {
+  const {name, number}=request.body 
+  if (!name || !number) { 
+    return response.status(400).json({error: 'name or number missing'})
+  } 
+  const person = new Person({name, number}) 
+  person.save().then(saved_person =>
+    response.json(saved_person)) 
+    .catch(error => next(error))
+  }  
+) 
 
 app.put('/api/persons/:id', (request, response, next) => {
   const {name, number} = request.body
@@ -88,19 +89,23 @@ const unknownEndpoint = (request, response) => {
 }
 app.use(unknownEndpoint)
 
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, req, res, next) => {
   console.error('🔥 ERROR NAME:', error.name)
   console.error('🔥 ERROR MESSAGE:', error.message)
   console.error('🔥 ERROR OBJECT:', error)
+
   if (error.name === 'ValidationError') {
     const messages = Object.values(error.errors).map(e => e.message)
-    return response.status(400).json({error: messages.join(', ') })
-  } 
-  if (error.name === 'CastError') {
-    return response.status(400).send({error:'Invalid ID format'})
+    return res.status(400).json({ error: messages.join(', ') })
   }
-  response.status(500).json({error: 'Internal server error'})
+
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'Invalid ID format' })
+  }
+
+  res.status(500).json({ error: 'Internal server error' })
 }
+app.use(errorHandler)
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001
