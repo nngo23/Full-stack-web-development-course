@@ -55,12 +55,12 @@ const App = () => {
             })
           })
           .catch(err => {
-            const backendMessage = err.response?.data?.error
-            showNotification({
-              type: 'error',
-              message: backendMessage || `Failed to update ${presentPerson.name}`,
-            })
-          })
+    console.log('❌ FULL AXIOS ERROR OBJECT:', err)
+    console.log('❌ err.response:', err.response)
+    console.log('❌ err.response.data:', err.response?.data)
+    const backendMessage = err.response?.data?.error
+    showNotification({ type: 'error', message: backendMessage || 'Unknown error' })
+  })
       }
       return
     }
@@ -75,10 +75,12 @@ const App = () => {
         showNotification({ type: 'success', message: `Added ${res.data.name}` })
       })
       .catch(err => {
-        console.log('❌ BACKEND ERROR DATA:', err.response?.data)
-        const backendMessage = err.response?.data?.error
-        showNotification({ type: 'error', message: backendMessage || 'Failed to add person' })
-      })
+    console.log('❌ FULL AXIOS ERROR OBJECT:', err)
+    console.log('❌ err.response:', err.response)
+    console.log('❌ err.response.data:', err.response?.data)
+    const backendMessage = err.response?.data?.error
+    showNotification({ type: 'error', message: backendMessage || 'Unknown error' })
+  })
   }
 
   // Delete person
