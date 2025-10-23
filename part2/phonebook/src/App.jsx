@@ -54,12 +54,24 @@ const App = () => {
               message: `Number of ${presentPerson.name} is changed`,
             })
           })
-          .catch(err => {
-    console.log('❌ FULL AXIOS ERROR OBJECT:', err)
+           .catch(err => {
+    console.log('❌ FULL AXIOS ERROR OBJECT:', err)         // <-- debug
     console.log('❌ err.response:', err.response)
     console.log('❌ err.response.data:', err.response?.data)
-    const backendMessage = err.response?.data?.error
-    showNotification({ type: 'error', message: backendMessage || 'Unknown error' })
+
+    let backendMessage = 'Unknown error'
+    if (err.response && err.response.data) {
+      if (typeof err.response.data.error === 'string') {
+        backendMessage = err.response.data.error
+      } else if (Array.isArray(err.response.data.error)) {
+        backendMessage = err.response.data.error.join(', ')
+      } else if (err.response.data.message) {
+        backendMessage = err.response.data.message
+      }
+    }
+
+    console.log('🔥 backendMessage to show:', backendMessage)
+    showNotification({ type: 'error', message: backendMessage })
   })
       }
       return
