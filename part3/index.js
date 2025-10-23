@@ -99,6 +99,7 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({error:'Invalid ID format'})
   }
   return response.status(500).json({error: 'Internal server error'})
+  next(error)
 }
 app.use(errorHandler)
 
