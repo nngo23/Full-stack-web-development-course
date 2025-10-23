@@ -84,10 +84,20 @@ const App = () => {
             message: `Number of ${presentPerson.name} is changed`,
           })
         })
-        .catch(error => {
-            console.log('❌ BACKEND ERROR DATA:', err.response?.data)
-            handleBackendError(err)}
-        )
+        .catch(err => {
+  console.log('❌ BACKEND ERROR RESPONSE:', err.response?.data)
+  console.log('❌ BACKEND ERROR STATUS:', err.response?.status)
+  console.log('❌ BACKEND ERROR FULL:', err)
+
+  // show backend message directly if exists
+  const backendMessage = err.response?.data?.error
+
+  if (backendMessage) {
+    showNotification({ type: 'error', message: backendMessage })
+  } else {
+    showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
+  }
+})
     }
     return
   }
@@ -103,9 +113,19 @@ const App = () => {
       showNotification({ type: 'success', message: `Added ${res.name}` })
     })
     .catch(err => {
-      console.log('❌ BACKEND ERROR DATA:', err.response?.data)
-      handleBackendError(err) // 👈 HERE — no fallback
-    })
+  console.log('❌ BACKEND ERROR RESPONSE:', err.response?.data)
+  console.log('❌ BACKEND ERROR STATUS:', err.response?.status)
+  console.log('❌ BACKEND ERROR FULL:', err)
+
+  // show backend message directly if exists
+  const backendMessage = err.response?.data?.error
+
+  if (backendMessage) {
+    showNotification({ type: 'error', message: backendMessage })
+  } else {
+    showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
+  }
+})
 }
 
   const deleteName = (id, name) => {
