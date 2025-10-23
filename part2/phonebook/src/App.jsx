@@ -92,15 +92,14 @@ const App = () => {
     personsServices
   .create(newPerson)
   .then(res => {
-    console.log('✅ THEN fired, got:', res)
-    showNotification({ type: 'success', message: 'Added person (unexpected)' })
+    setPersons(persons.concat(res))
+    setNewName('')
+    setNewNumber('')
+    showNotification({ type: 'success', message: `Added ${res.name}` })
   })
-  .catch(err => {
-    console.log('❌ CATCH fired, got:', err)
-  })
-  .finally(() => {
-    console.log('🧭 FINALLY fired after POST')
-  })
+  .catch(err =>
+    handleBackendError(err, `Failed to add ${newPerson.name}`)
+  )
   }
 
   const deleteName = (id, name) => {
