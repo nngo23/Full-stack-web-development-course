@@ -28,21 +28,18 @@ const App = () => {
   const personToShow = persons.filter(person => person.name.trim().toLowerCase().includes(filteredName.toLowerCase()))
   
   const handleBackendError = (error, fallbackMessage) => {
-  console.log('Full Axios error:', error)
-  console.log('error.response:', error.response)
-  console.log('error.response.data:', error.response?.data)
+  console.log('Axios error object:', error)
+  console.log('Axios response:', error.response)
 
   let backendMessage = fallbackMessage
-  const data = error.response?.data
 
+  // Fallback: sometimes data is in responseText
+  const data = error.response?.data || error.response?.responseText
   if (data) {
-    if (typeof data.error === 'string') {
-      backendMessage = data.error
-    } else if (Array.isArray(data.error)) {
-      backendMessage = data.error.join(', ')
-    } else if (data.message) {
-      backendMessage = data.message
-    }
+    if (typeof data === 'string') backendMessage = data
+    else if (data.error) backendMessage = data.error
+    else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
+    else if (data.message) backendMessage = data.message
   }
 
   showNotification({ type: 'error', message: backendMessage })
