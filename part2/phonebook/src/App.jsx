@@ -140,6 +140,6 @@ const App = () => {
       <Persons personToShow={personToShow} deleteName={deleteName} />
     </div>
   )
-}
+
 
 export default App
