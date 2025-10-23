@@ -40,7 +40,7 @@ app.post('/api/persons', (request, response, next) => {
   const person = new Person({name, number}) 
   person.save().then(saved_person =>
     response.json(saved_person)) 
-    .catch(next)
+    .catch(error => next(error))
   }  
 ) 
 
