@@ -79,16 +79,18 @@ app.use((req, res) => {
 })
 
 app.use((error, req, res, next) => {
-  if (error.name === 'ValidationError') {
-    const messages = Object.values(error.errors).map(a => a.message)
-    return response.status(400).json({error: messages.join(', ')})
-  } 
+  console.error('Error name:', error.name)
+  console.error('Error message:', error.message)
 
-  if (error.name === 'CastError') {
-    return res.status(400).json({ error: 'Invalid ID format' })
+  if (error.name === 'ValidationError') {
+    const messages =Object.values(error.errors).map(a => a.message)
+    return res.status(400).json({error: messages.join(', ')})
   }
 
-  res.status(500).json({error: 'Internal server error'})
+  if (error.name === 'CastError') {
+    return res.status(400).json({error: 'Invalid ID format'})
+  }
+  res.status(500).json({error: error.message || 'Internal server error'})
 })
 
 app.get(/^\/.*$/, (req, res) => {
