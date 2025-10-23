@@ -43,8 +43,6 @@ const App = () => {
         showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
         })
         .catch(error => {
-          console.log('Full Axios error (update):', error)
-          console.log('Axios response:', error.response)
           const backendError = error.response?.data?.error
           if (backendError) {
             showNotification({ type: 'error', message: backendError })
@@ -68,7 +66,6 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      console.log('Full Axios error (create):', error)
       const backendError = error.response?.data?.error
       if (backendError) {
         showNotification({ type: 'error', message: backendError })
