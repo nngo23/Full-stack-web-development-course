@@ -4,11 +4,17 @@ const cors = require('cors')
 const morgan = require('morgan')
 const Person = require('./models/person')
 app.use(cors())
-app.use(express.static('dist'))
+
 app.use(express.json())
+
+morgan.token('postPerson',request => {
+  if (request.method === 'POST') {
+    return JSON.stringify(request.body)
+    } return null
+})
 app.use(morgan(
   ':method :url :status :res[content-length] - :response-time ms :postPerson'))
-
+  
 app.post('/api/persons', (request, response, next) => {
   const {name, number}=request.body 
   if (!name || !number) { 
@@ -21,11 +27,7 @@ app.post('/api/persons', (request, response, next) => {
   }  
 ) 
 
-morgan.token('postPerson',request => {
-  if (request.method === 'POST') {
-    return JSON.stringify(request.body)
-    } return null
-})
+
 
 app.get('/api/persons', (request, response, next) => {
   Person.find({}).then(person => 
@@ -80,7 +82,7 @@ app.get('/info', (request, response, next) => {
     })
     .catch(error => next(error))
 })
-
+app.use(express.static('dist'))
 const unknownEndpoint = (request, response) => {
   response.status(404).send({error: 'unknown endpoint'})
 }
