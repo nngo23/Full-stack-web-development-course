@@ -26,19 +26,12 @@ const App = () => {
 
   // Robust backend error handler
   const handleBackendError = (error, fallbackMessage) => {
-  console.log('Full Axios error object:', error)
-  console.log('error.response:', error.response)
-  console.log('error.response?.data:', error.response?.data)
-  console.log('error.response?.request?.responseText:', error.response?.request?.responseText)
-
+  console.log('Axios full error:', error)
   let backendMessage = fallbackMessage
-  let data = error.response?.data || error.response?.request?.responseText
+
+  const data = error.response?.data
 
   if (data) {
-    try {
-      if (typeof data === 'string') data = JSON.parse(data)
-    } catch { /* keep as string */ }
-
     if (typeof data === 'string') backendMessage = data
     else if (data.error) backendMessage = data.error
     else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
