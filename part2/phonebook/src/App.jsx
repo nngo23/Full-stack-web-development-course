@@ -26,30 +26,27 @@ const App = () => {
 
   // Robust backend error handler
   const handleBackendError = (error, fallbackMessage) => {
-    console.log('Axios full error:', error)
+  console.log('Full Axios error object:', error)
+  console.log('error.response:', error.response)
+  console.log('error.response?.data:', error.response?.data)
+  console.log('error.response?.request?.responseText:', error.response?.request?.responseText)
 
-    let backendMessage = fallbackMessage
-    let data = error.response?.data
+  let backendMessage = fallbackMessage
+  let data = error.response?.data || error.response?.request?.responseText
 
-    // Fallback for same port: parse raw responseText if Axios failed
-    if (!data && error.response?.request?.responseText) {
-      try {
-        data = JSON.parse(error.response.request.responseText)
-      } catch {
-        data = error.response.request.responseText
-      }
-    }
+  if (data) {
+    try {
+      if (typeof data === 'string') data = JSON.parse(data)
+    } catch { /* keep as string */ }
 
-    if (data) {
-      if (typeof data === 'string') backendMessage = data
-      else if (data.error) backendMessage = data.error
-      else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
-      else if (data.message) backendMessage = data.message
-    }
-
-    showNotification({ type: 'error', message: backendMessage })
+    if (typeof data === 'string') backendMessage = data
+    else if (data.error) backendMessage = data.error
+    else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
+    else if (data.message) backendMessage = data.message
   }
 
+  showNotification({ type: 'error', message: backendMessage })
+}
   // Filtered list
   const personToShow = persons.filter(person =>
     person.name.trim().toLowerCase().includes(filteredName.toLowerCase())
