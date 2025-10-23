@@ -34,26 +34,24 @@ const App = () => {
     setTimeout(() => setNotification({type: '', message: null}), 6000)
   }
 
-  const handleBackendError = (error, fallbackMessage = 'Server error') => {
-    console.log('Backend error:', error)
-
+  const handleBackendError = (error, fallbackMessage) => {
     if (!error.response) {
-      showNotification({type: 'error', message: fallbackMessage})
-      return
-    }
-
-    const {data} = error.response
-    let message = fallbackMessage
-
-    if (data?.error) {
-      message = Array.isArray(data.error)
-        ? data.error.join(', ')
-        : data.error
-    } else if (data?.message) {
-      message = data.message
-    }
-
-    showNotification({type:'error', message})
+      console.log('No error.response, Axios might be failing before response.') 
+      showNotification({type: 'error', message: fallbackMessage}) 
+      return 
+    } 
+    const data = error.response.data 
+    let backendMessage = fallbackMessage 
+    if (data) {
+      if (typeof data.error === 'string') {
+        backendMessage = data.error 
+      } else if (Array.isArray(data.error)) {
+        backendMessage = data.error.join(', ') 
+      } else if (data.message) { 
+        backendMessage = data.message} 
+    } 
+      
+    showNotification({type: 'error', message: backendMessage}) 
   }
 
   const personToShow = persons.filter(person =>
