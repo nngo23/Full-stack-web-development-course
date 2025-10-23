@@ -1,6 +1,5 @@
 import axios from 'axios'
 
-// Since frontend is served by backend, use relative URL
 const baseUrl = '/api/persons'
 
 const getAll = () => axios.get(baseUrl)
@@ -8,4 +7,4 @@ const create = newPerson => axios.post(baseUrl, newPerson)
 const update = (id, updatedPerson) => axios.put(`${baseUrl}/${id}`, updatedPerson)
 const remove = id => axios.delete(`${baseUrl}/${id}`)
 
-export default { getAll, create, update, remove }
+export default {getAll, create, update, remove}
