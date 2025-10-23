@@ -91,14 +91,14 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  console.error(err.message)
+  console.error(error.message)
   if (error.name === 'ValidationError') {
     return response.status(400).json({error: error.message})
   } 
   if (error.name === 'CastError') {
     return response.status(400).send({error:'Invalid ID format'})
   }
-  response.status(500).json({error: 'Internal server error'})
+  return response.status(500).json({error: 'Internal server error'})
 }
 app.use(errorHandler)
 
