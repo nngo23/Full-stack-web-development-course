@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Keep same port, relative path works with frontend + backend on 3001
-const baseUrl = '/api/persons'
+const baseUrl = 'https://phonebook-backend-7ar1.onrender.com/api/persons'
 
 const getAll = () => axios.get(baseUrl).then(res => res.data)
 
