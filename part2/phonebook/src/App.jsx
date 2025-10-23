@@ -26,9 +26,11 @@ const App = () => {
 
   // Robust backend error handler
   const handleBackendError = (error, fallbackMessage) => {
-  console.log('Axios full error:', error)
-  let backendMessage = fallbackMessage
+  console.log('🔥 Full Axios error:', error)                // Entire Axios error object
+  console.log('🔥 error.response:', error.response)        // Response object from server
+  console.log('🔥 error.response.data:', error.response?.data) // JSON payload sent from server
 
+  let backendMessage = fallbackMessage
   const data = error.response?.data
 
   if (data) {
@@ -38,6 +40,7 @@ const App = () => {
     else if (data.message) backendMessage = data.message
   }
 
+  console.log('🔥 Backend message to show:', backendMessage)
   showNotification({ type: 'error', message: backendMessage })
 }
   // Filtered list
