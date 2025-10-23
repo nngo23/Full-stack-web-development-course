@@ -20,6 +20,13 @@ const App = () => {
       setPersons(firstPersons)
     })
   }, [])
+  
+  const showNotification = ({type,message}) => {
+    setNotification({type,message})
+    setTimeout (() => {setNotification({type:'',message:null})}, 6000)
+  }
+  const personToShow = persons.filter(person => person.name.trim().toLowerCase().includes(filteredName.toLowerCase()))
+  
   const handleBackendError = (error, fallbackMessage) => {
   console.log('Full Axios error:', error)
   console.log('error.response:', error.response)
@@ -40,13 +47,6 @@ const App = () => {
 
   showNotification({ type: 'error', message: backendMessage })
 }
-  const showNotification = ({type,message}) => {
-    setNotification({type,message})
-    setTimeout (() => {setNotification({type:'',message:null})}, 6000)
-  }
-  const personToShow = persons.filter(person => person.name.trim().toLowerCase().includes(filteredName.toLowerCase()))
-  
-
   const addName = (event) => {
     event.preventDefault()
     const presentPerson = persons.find(p => newName.trim().toLowerCase() === p.name.trim().toLowerCase())
@@ -79,7 +79,7 @@ const App = () => {
     })
     .catch(error => handleBackendError(error, `Failed to add ${newPerson.name}`))
   }
-    
+
   
 
   const deleteName = (id, name) => {
@@ -121,6 +121,6 @@ const App = () => {
 
     </div>
   )
-}
+
 
 export default App
