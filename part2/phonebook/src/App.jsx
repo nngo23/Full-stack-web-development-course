@@ -43,10 +43,24 @@ const App = () => {
         showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
         })
         .catch(error => {
-          const backendError = error.response?.data?.error || error.response?.data?.message
-          showNotification({ type: 'error', message: backendError ?? `Failed to update ${presentPerson.name}` })
-          setPersons(persons.filter(p => p.id !== presentPerson.id))
-        })
+           const data = error.response?.data
+  let backendError = ''
+
+  if (data) {
+    if (typeof data.error === 'string') {
+      backendError = data.error
+    } else if (Array.isArray(data.error)) {
+      backendError = data.error.join(', ')
+    } else if (data.message) {
+      backendError = data.message
+    }
+  }
+
+  showNotification({ 
+    type: 'error', 
+    message: backendError || `Failed to add ${newPerson.name}` 
+  })
+})
         return
       }
     return
