@@ -35,23 +35,24 @@ const App = () => {
   }
 
   const handleBackendError = (error, fallbackMessage) => {
+    
     if (!error.response) {
-      console.log('No error.response, Axios might be failing before response.') 
-      showNotification({type: 'error', message: fallbackMessage}) 
-      return 
-    } 
-    const data = error.response.data 
-    let backendMessage = fallbackMessage 
+      console.log('⚠️ No error.response, Axios might be failing before response.')
+      showNotification({type: 'error', message: fallbackMessage})
+      return
+    }
+    const data = error.response.data
+    let backendMessage = fallbackMessage
     if (data) {
       if (typeof data.error === 'string') {
-        backendMessage = data.error 
+        backendMessage = data.error
       } else if (Array.isArray(data.error)) {
-        backendMessage = data.error.join(', ') 
-      } else if (data.message) { 
-        backendMessage = data.message} 
-    } 
-      
-    showNotification({type: 'error', message: backendMessage}) 
+        backendMessage = data.error.join(', ')
+      } else if (data.message) {
+        backendMessage = data.message
+      }
+    }
+    showNotification({type: 'error', message: backendMessage})
   }
 
   const personToShow = persons.filter(person =>
@@ -60,24 +61,33 @@ const App = () => {
 
   const addName = (event) => {
     event.preventDefault()
-    const existingPerson = persons.find(
-      p => p.name.toLowerCase() === newName.toLowerCase()
+    const presentPerson = persons.find(
+      p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
     )
 
-    if (existingPerson) {
-      if (window.confirm(
-        `${existingPerson.name} is already added, replace the old number?`
-      )) {
-        const updatedPerson = {...existingPerson, number: newNumber}
+    if (presentPerson) {
+      const confirmUpdate = window.confirm(
+        `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
+      )
+      if (confirmUpdate) {
+        const updatedPerson = { ...presentPerson, number: newNumber}
         personsServices
-          .update(existingPerson.id, updatedPerson)
-          .then(returned => {
-            setPersons(persons.map(p => p.id === existingPerson.id ? returned : p))
+          .update(presentPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(
+              persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
+            )
             setNewName('')
             setNewNumber('')
-            showNotification({type: 'success', message: `Updated ${returned.name}`})
+            showNotification({
+              type: 'success',
+              message: `Number of ${presentPerson.name} is changed`,
+            })
           })
-          .catch(handleBackendError)
+          .catch(err => {
+            console.log('Backend error data:', err.response?.data)
+            handleBackendError(err, '') 
+          })
       }
       return
     }
@@ -85,13 +95,16 @@ const App = () => {
     const newPerson = {name: newName, number: newNumber}
     personsServices
       .create(newPerson)
-      .then(created => {
-        setPersons(persons.concat(created))
+      .then(res => {
+        setPersons(persons.concat(res))
         setNewName('')
         setNewNumber('')
-        showNotification({ type:'success', message: `Added ${created.name}`})
+        showNotification({type: 'success', message:`Added ${res.name}`})
       })
-      .catch(handleBackendError)
+      .catch(err => {
+        console.log('Backend error data:', err.response?.data)
+        handleBackendError(err, '')
+      })
   }
 
   const deleteName = (id, name) => {
@@ -102,10 +115,10 @@ const App = () => {
           setPersons(persons.filter(p => p.id !== id))
           showNotification({type: 'success', message: `Deleted ${name}`})
         })
-        .catch(() => {
+        .catch(error => {
           showNotification({
             type: 'error',
-            message: `Information of ${name} was already deleted`
+            message: `Information of ${name} was already deleted from server`
           })
           setPersons(persons.filter(p => p.id !== id))
         })
@@ -115,12 +128,11 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {notification.message && (
+      {notification && (
         <Notification type={notification.type} message={notification.message}/>
       )}
       <Filter
-        filteredName={filteredName}
-        handleFilteredName={e => setFiltered(e.target.value)}
+        filteredName={filteredName}   handleFilteredName={e => setFiltered(e.target.value)}
       />
       <h3>Add a new</h3>
       <PersonForm
