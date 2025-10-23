@@ -94,7 +94,18 @@ const App = () => {
       <h2>Phonebook</h2>
       <Notification type={notification.type} message={notification.message}/>
       <Filter filteredName={filteredName} handleFilteredName={handleFilteredName} />
-      
+      {errorMessage && (
+        <div style={{
+          color: 'red',
+          background: '#fdd',
+          border: '1px solid red',
+          padding: '10px',
+          marginBottom: '10px',
+          borderRadius: '5px'
+          }}>
+          {errorMessage}
+        </div>
+      )}
       <h3>add a new</h3>
       <PersonForm 
         addName={addName}
