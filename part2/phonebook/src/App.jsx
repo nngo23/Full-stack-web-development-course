@@ -61,8 +61,11 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      setErrorMessage(error.response.data.error)
-      setTimeout(() => setErrorMessage(null), 6000)
+      if (error.response?.data?.error) {
+        setErrorMessage(error.response.data.error);
+      } else {
+        setErrorMessage(`Could not add ${newPerson.name}`);
+      }   
     })
   }
     
