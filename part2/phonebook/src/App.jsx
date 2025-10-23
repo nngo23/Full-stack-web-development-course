@@ -20,7 +20,26 @@ const App = () => {
       setPersons(firstPersons)
     })
   }, [])
+  const handleBackendError = (error, fallbackMessage) => {
+  console.log('Full Axios error:', error)
+  console.log('error.response:', error.response)
+  console.log('error.response.data:', error.response?.data)
 
+  let backendMessage = fallbackMessage
+  const data = error.response?.data
+
+  if (data) {
+    if (typeof data.error === 'string') {
+      backendMessage = data.error
+    } else if (Array.isArray(data.error)) {
+      backendMessage = data.error.join(', ')
+    } else if (data.message) {
+      backendMessage = data.message
+    }
+  }
+
+  showNotification({ type: 'error', message: backendMessage })
+}
   const showNotification = ({type,message}) => {
     setNotification({type,message})
     setTimeout (() => {setNotification({type:'',message:null})}, 6000)
@@ -42,25 +61,8 @@ const App = () => {
         setNewNumber('')
         showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
         })
-        .catch(error => {
-           const data = error.response?.data
-  let backendError = ''
-
-  if (data) {
-    if (typeof data.error === 'string') {
-      backendError = data.error
-    } else if (Array.isArray(data.error)) {
-      backendError = data.error.join(', ')
-    } else if (data.message) {
-      backendError = data.message
-    }
-  }
-
-  showNotification({ 
-    type: 'error', 
-    message: backendError || `Failed to add ${newPerson.name}` 
-  })
-})
+        .catch(error => handleBackendError(error, `Failed to update ${presentPerson.name}`))
+}
         return
       }
     return
@@ -75,17 +77,7 @@ const App = () => {
       setNewNumber('')
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
-    .catch(error => {
-    console.log('Axios error:', error)                 // Debug full error
-    console.log('Axios error.response:', error.response) // Debug response
-
-    const backendError = error.response?.data?.error || error.response?.data?.message     // Read Mongoose message
-    if (backendError) {
-      showNotification({ type: 'error', message: backendError })
-    } else {
-      showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
-    }
-    })    
+    .catch(error => handleBackendError(error, `Failed to add ${newPerson.name}`))
   }
     
   
