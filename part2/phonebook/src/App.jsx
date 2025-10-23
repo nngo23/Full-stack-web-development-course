@@ -26,108 +26,67 @@ const App = () => {
     setTimeout(() => setNotification({ type: '', message: null }), 6000)
   }
 
-  // Proper backend error handler
-    const handleBackendError = error => {
-    console.log('🔥 handleBackendError called!')
-    console.log('🔥 Full error object:', error)
-
-    if (!error.response) {
-      showNotification({ type: 'error', message: 'No response from server' })
-      return
-    }
-
-    const data = error.response.data
-    console.log('🔥 error.response.data:', data)
-
-    // ✅ Always prefer backend error message directly
-    if (data && typeof data.error === 'string') {
-      showNotification({ type: 'error', message: data.error })
-    } else if (data && data.message) {
-      showNotification({ type: 'error', message: data.message })
-    } else {
-      showNotification({ type: 'error', message: 'Unknown backend error' })
-    }
-  }
-      // If still empty, fallback to generic (rare)
-      if (!backendMessage) backendMessage = fallbackMessage || 'Unknown backend error'
-
-      showNotification({ type: 'error', message: backendMessage })
-    }
-
+  // Filtered persons
   const personToShow = persons.filter(person =>
     person.name.trim().toLowerCase().includes(filteredName.toLowerCase())
   )
 
+  // Add or update person
   const addName = event => {
-  event.preventDefault()
-
-  const presentPerson = persons.find(
-    p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
-  )
-
-  if (presentPerson) {
-    const confirmUpdate = window.confirm(
-      `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
+    event.preventDefault()
+    const presentPerson = persons.find(
+      p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
     )
-    if (confirmUpdate) {
-      const updatedPerson = { ...presentPerson, number: newNumber }
-      personsServices
-        .update(presentPerson.id, updatedPerson)
-        .then(returnedPerson => {
-          setPersons(
-            persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
-          )
-          setNewName('')
-          setNewNumber('')
-          showNotification({
-            type: 'success',
-            message: `Number of ${presentPerson.name} is changed`,
+
+    // Update existing person
+    if (presentPerson) {
+      const confirmUpdate = window.confirm(
+        `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
+      )
+      if (confirmUpdate) {
+        const updatedPerson = { ...presentPerson, number: newNumber }
+        personsServices
+          .update(presentPerson.id, updatedPerson)
+          .then(returnedPerson => {
+            setPersons(
+              persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
+            )
+            setNewName('')
+            setNewNumber('')
+            showNotification({
+              type: 'success',
+              message: `Number of ${presentPerson.name} is changed`,
+            })
           })
-        })
-        .catch(err => {
-  console.log('❌ BACKEND ERROR RESPONSE:', err.response?.data)
-  console.log('❌ BACKEND ERROR STATUS:', err.response?.status)
-  console.log('❌ BACKEND ERROR FULL:', err)
-
-  // show backend message directly if exists
-  const backendMessage = err.response?.data?.error
-
-  if (backendMessage) {
-    showNotification({ type: 'error', message: backendMessage })
-  } else {
-    showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
-  }
-})
+          .catch(err => {
+            const backendMessage = err?.response?.data?.error
+            showNotification({
+              type: 'error',
+              message: backendMessage || `Failed to update ${presentPerson.name}`,
+            })
+          })
+      }
+      return
     }
-    return
+
+    // Add new person
+    const newPerson = { name: newName, number: newNumber }
+    personsServices
+      .create(newPerson)
+      .then(res => {
+        setPersons(persons.concat(res))
+        setNewName('')
+        setNewNumber('')
+        showNotification({ type: 'success', message: `Added ${res.name}` })
+      })
+      .catch(err => {
+        const backendMessage = err?.response?.data?.error
+        console.log('❌ BACKEND ERROR DATA:', err.response?.data)
+        showNotification({ type: 'error', message: backendMessage || 'Failed to add person' })
+      })
   }
 
-  const newPerson = { name: newName, number: newNumber }
-
-  personsServices
-    .create(newPerson)
-    .then(res => {
-      setPersons(persons.concat(res))
-      setNewName('')
-      setNewNumber('')
-      showNotification({ type: 'success', message: `Added ${res.name}` })
-    })
-    .catch(err => {
-  console.log('❌ BACKEND ERROR RESPONSE:', err.response?.data)
-  console.log('❌ BACKEND ERROR STATUS:', err.response?.status)
-  console.log('❌ BACKEND ERROR FULL:', err)
-
-  // show backend message directly if exists
-  const backendMessage = err.response?.data?.error
-
-  if (backendMessage) {
-    showNotification({ type: 'error', message: backendMessage })
-  } else {
-    showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
-  }
-})
-}
-
+  // Delete person
   const deleteName = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
       personsServices
@@ -149,7 +108,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      {notification && (
+      {notification && notification.message && (
         <Notification type={notification.type} message={notification.message} />
       )}
       <Filter
@@ -168,6 +127,6 @@ const App = () => {
       <Persons personToShow={personToShow} deleteName={deleteName} />
     </div>
   )
-
+}
 
 export default App
