@@ -10,130 +10,71 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filteredName, setFiltered] = useState('')
-  const [notification, setNotification] = useState({type: '', message: null})
+  const [notification, setNotification] = useState({ type: '', message: null })
 
   useEffect(() => {
-  personsServices
-    .getAll()
-    .then(firstPersons => {
-      if (Array.isArray(firstPersons)) {
-        setPersons(firstPersons)
-      } else {
-        console.error('Expected an array but got:',firstPersons)
-        setPersons([]) 
-      }
-    })
-    .catch(err => {
-      console.error('Fetch failed:', err)
-      setPersons([]) 
-    })
+    personsServices.getAll().then(setPersons).catch(console.error)
   }, [])
 
-  const showNotification = ({type, message}) => {
-    setNotification({type, message})
-    setTimeout(() => setNotification({type: '', message: null}), 6000)
+  const showNotification = ({ type, message }) => {
+    setNotification({ type, message })
+    setTimeout(() => setNotification({ type: '', message: null }), 6000)
   }
 
-  const handleBackendError = (error, fallbackMessage) => {
-    
-    if (!error.response) {
-      console.log('⚠️ No error.response, Axios might be failing before response.')
-      showNotification({type: 'error', message: fallbackMessage})
-      return
-    }
-    const data = error.response.data
-    let backendMessage = fallbackMessage
-    if (data) {
-      if (typeof data.error === 'string') {
-        backendMessage = data.error
-      } else if (Array.isArray(data.error)) {
-        backendMessage = data.error.join(', ')
-      } else if (data.message) {
-        backendMessage = data.message
-      }
-    }
-    showNotification({type: 'error', message: backendMessage})
+  const handleBackendError = (error) => {
+    const msg = error.response?.data?.error || 'Server error'
+    showNotification({ type: 'error', message: msg })
   }
-
-  const personToShow = persons.filter(person =>
-    person.name.toLowerCase().includes(filteredName.toLowerCase())
-  )
 
   const addName = (event) => {
     event.preventDefault()
-    const presentPerson = persons.find(
-      p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
-    )
+    const presentPerson = persons.find(p => p.name.toLowerCase() === newName.trim().toLowerCase())
 
     if (presentPerson) {
-      const confirmUpdate = window.confirm(
-        `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
-      )
-      if (confirmUpdate) {
-        const updatedPerson = { ...presentPerson, number: newNumber}
-        personsServices
-          .update(presentPerson.id, updatedPerson)
-          .then(returnedPerson => {
-            setPersons(
-              persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
-            )
+      if (window.confirm(`${presentPerson.name} already exists. Replace number?`)) {
+        personsServices.update(presentPerson.id, { ...presentPerson, number: newNumber })
+          .then(updated => {
+            setPersons(persons.map(p => (p.id === presentPerson.id ? updated : p)))
             setNewName('')
             setNewNumber('')
-            showNotification({
-              type: 'success',
-              message: `Number of ${presentPerson.name} is changed`,
-            })
+            showNotification({ type: 'success', message: `Updated ${updated.name}` })
           })
-          .catch(err => {
-            console.log('Backend error data:', err.response?.data)
-            handleBackendError(err, '') 
-          })
+          .catch(handleBackendError)
       }
       return
     }
 
-    const newPerson = {name: newName, number: newNumber}
-    personsServices
-      .create(newPerson)
-      .then(res => {
-        setPersons(persons.concat(res))
+    personsServices.create({ name: newName, number: newNumber })
+      .then(added => {
+        setPersons(persons.concat(added))
         setNewName('')
         setNewNumber('')
-        showNotification({type: 'success', message:`Added ${res.name}`})
+        showNotification({ type: 'success', message: `Added ${added.name}` })
       })
-      .catch(err => {
-        console.log('Backend error data:', err.response?.data)
-        handleBackendError(err, '')
-      })
+      .catch(handleBackendError)
   }
 
   const deleteName = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
-      personsServices
-        .remove(id)
+      personsServices.remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id))
-          showNotification({type: 'success', message: `Deleted ${name}`})
+          showNotification({ type: 'success', message: `Deleted ${name}` })
         })
-        .catch(error => {
-          showNotification({
-            type: 'error',
-            message: `Information of ${name} was already deleted from server`
-          })
+        .catch(() => {
           setPersons(persons.filter(p => p.id !== id))
+          showNotification({ type: 'error', message: `Information of ${name} already removed from server` })
         })
     }
   }
 
+  const personToShow = persons.filter(p => p.name.toLowerCase().includes(filteredName.toLowerCase()))
+
   return (
     <div>
       <h2>Phonebook</h2>
-      {notification && (
-        <Notification type={notification.type} message={notification.message}/>
-      )}
-      <Filter
-        filteredName={filteredName}   handleFilteredName={e => setFiltered(e.target.value)}
-      />
+      {notification.message && <Notification type={notification.type} message={notification.message} />}
+      <Filter filteredName={filteredName} handleFilteredName={e => setFiltered(e.target.value)} />
       <h3>Add a new</h3>
       <PersonForm
         addName={addName}
