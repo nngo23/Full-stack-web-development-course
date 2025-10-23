@@ -93,14 +93,15 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'ValidationError') {
-    return response.status(400).json({error: error.message})
+    const messages = Object.values(error.errors).map(e => e.message);
+    return res.status(400).json({ error: messages.join(', ') })
   } 
+  next(error)
   if (error.name === 'CastError') {
     return response.status(400).send({error:'Invalid ID format'})
   }
   return response.status(500).json({error: 'Internal server error'})
-  next(error)
-}
+  }
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 3001

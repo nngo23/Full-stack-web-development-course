@@ -61,12 +61,9 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
-      console.log('Error response:', error.response)
-      if (error.response?.data?.error) {
-        setErrorMessage(error.response.data.error);
-      } else {
-        setErrorMessage(`Could not add ${newPerson.name}`);
-      }   
+      console.log('Error response:', error.response);
+      const msg = error.response?.data?.error || `Could not add ${newPerson.name}`;
+      showNotification({ type: 'error', message: msg })
     })
   }
     
@@ -96,20 +93,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification type={notification.type} message={notification.message}/>
+      {notification && <Notification type={notification.type} message={notification.message}/>}
       <Filter filteredName={filteredName} handleFilteredName={handleFilteredName} />
-      {errorMessage && (
-        <div style={{
-          color: 'red',
-          background: '#fdd',
-          border: '1px solid red',
-          padding: '10px',
-          marginBottom: '10px',
-          borderRadius: '5px'
-          }}>
-          {errorMessage}
-        </div>
-      )}
       <h3>add a new</h3>
       <PersonForm 
         addName={addName}
