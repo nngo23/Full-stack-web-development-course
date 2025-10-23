@@ -61,6 +61,7 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
+      console.log('Error response:', error.response)
       if (error.response?.data?.error) {
         setErrorMessage(error.response.data.error);
       } else {
