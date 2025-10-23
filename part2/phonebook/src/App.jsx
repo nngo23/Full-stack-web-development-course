@@ -27,29 +27,32 @@ const App = () => {
   }
 
   // Proper backend error handler
-  const handleBackendError = (error, fallbackMessage) => {
+    const handleBackendError = error => {
     console.log('🔥 handleBackendError called!')
-    console.log('🔥 Full error object:', error) 
+    console.log('🔥 Full error object:', error)
 
     if (!error.response) {
-      showNotification({ type: 'error', message: fallbackMessage })
+      showNotification({ type: 'error', message: 'No response from server' })
       return
     }
 
     const data = error.response.data
     console.log('🔥 error.response.data:', data)
 
-    let backendMessage = fallbackMessage
-
-    if (data) {
-      if (typeof data.error === 'string') backendMessage = data.error
-      else if (data.error?.message) backendMessage = data.error.message
-      else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
-      else if (data.message) backendMessage = data.message
+    // ✅ Always prefer backend error message directly
+    if (data && typeof data.error === 'string') {
+      showNotification({ type: 'error', message: data.error })
+    } else if (data && data.message) {
+      showNotification({ type: 'error', message: data.message })
+    } else {
+      showNotification({ type: 'error', message: 'Unknown backend error' })
     }
-
-    showNotification({ type: 'error', message: backendMessage })
   }
+      // If still empty, fallback to generic (rare)
+      if (!backendMessage) backendMessage = fallbackMessage || 'Unknown backend error'
+
+      showNotification({ type: 'error', message: backendMessage })
+    }
 
   const personToShow = persons.filter(person =>
     person.name.trim().toLowerCase().includes(filteredName.toLowerCase())
@@ -81,8 +84,9 @@ const App = () => {
             message: `Number of ${presentPerson.name} is changed`,
           })
         })
-        .catch(error =>
-          handleBackendError(error, '') // 👈 updated here too for consistency
+        .catch(error => {
+            console.log('❌ BACKEND ERROR DATA:', err.response?.data)
+            handleBackendError(err)}
         )
     }
     return
@@ -100,7 +104,7 @@ const App = () => {
     })
     .catch(err => {
       console.log('❌ BACKEND ERROR DATA:', err.response?.data)
-      handleBackendError(err, '') // 👈 HERE — no fallback
+      handleBackendError(err) // 👈 HERE — no fallback
     })
 }
 
@@ -144,6 +148,6 @@ const App = () => {
       <Persons personToShow={personToShow} deleteName={deleteName} />
     </div>
   )
-}
+
 
 export default App
