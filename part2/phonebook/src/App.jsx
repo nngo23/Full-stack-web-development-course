@@ -29,25 +29,23 @@ const App = () => {
   // Proper backend error handler
   const handleBackendError = (error, fallbackMessage) => {
     console.log('🔥 handleBackendError called!')
-    console.log('🔥 Full error object:', error)
+    console.log('🔥 Full error object:', error) 
 
     if (!error.response) {
-      console.log('⚠️ No error.response, Axios might be failing before response.')
       showNotification({ type: 'error', message: fallbackMessage })
       return
     }
 
     const data = error.response.data
+    console.log('🔥 error.response.data:', data)
+
     let backendMessage = fallbackMessage
 
     if (data) {
-      if (typeof data.error === 'string') {
-        backendMessage = data.error
-      } else if (Array.isArray(data.error)) {
-        backendMessage = data.error.join(', ')
-      } else if (data.message) {
-        backendMessage = data.message
-      }
+      if (typeof data.error === 'string') backendMessage = data.error
+      else if (data.error?.message) backendMessage = data.error.message
+      else if (Array.isArray(data.error)) backendMessage = data.error.join(', ')
+      else if (data.message) backendMessage = data.message
     }
 
     showNotification({ type: 'error', message: backendMessage })
@@ -58,50 +56,53 @@ const App = () => {
   )
 
   const addName = event => {
-    event.preventDefault()
-    const presentPerson = persons.find(
-      p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
+  event.preventDefault()
+
+  const presentPerson = persons.find(
+    p => newName.trim().toLowerCase() === p.name.trim().toLowerCase()
+  )
+
+  if (presentPerson) {
+    const confirmUpdate = window.confirm(
+      `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
     )
-
-    if (presentPerson) {
-      const confirmUpdate = window.confirm(
-        `${presentPerson.name} is already added to phonebook, replace the old number with a new one?`
-      )
-      if (confirmUpdate) {
-        const updatedPerson = { ...presentPerson, number: newNumber }
-        personsServices
-          .update(presentPerson.id, updatedPerson)
-          .then(returnedPerson => {
-            setPersons(
-              persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
-            )
-            setNewName('')
-            setNewNumber('')
-            showNotification({
-              type: 'success',
-              message: `Number of ${presentPerson.name} is changed`,
-            })
-          })
-          .catch(error =>
-            handleBackendError(error, `Failed to update ${presentPerson.name}`)
+    if (confirmUpdate) {
+      const updatedPerson = { ...presentPerson, number: newNumber }
+      personsServices
+        .update(presentPerson.id, updatedPerson)
+        .then(returnedPerson => {
+          setPersons(
+            persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
           )
-      }
-      return
+          setNewName('')
+          setNewNumber('')
+          showNotification({
+            type: 'success',
+            message: `Number of ${presentPerson.name} is changed`,
+          })
+        })
+        .catch(error =>
+          handleBackendError(error, '') // 👈 updated here too for consistency
+        )
     }
-
-    const newPerson = { name: newName, number: newNumber }
-    personsServices
-      .create(newPerson)
-      .then(res => {
-        setPersons(persons.concat(res))
-        setNewName('')
-        setNewNumber('')
-        showNotification({ type: 'success', message: `Added ${res.name}` })
-      })
-      .catch(err =>
-        handleBackendError(err, `Failed to add ${newPerson.name}`)
-      )
+    return
   }
+
+  const newPerson = { name: newName, number: newNumber }
+
+  personsServices
+    .create(newPerson)
+    .then(res => {
+      setPersons(persons.concat(res))
+      setNewName('')
+      setNewNumber('')
+      showNotification({ type: 'success', message: `Added ${res.name}` })
+    })
+    .catch(err => {
+      console.log('❌ BACKEND ERROR DATA:', err.response?.data)
+      handleBackendError(err, '') // 👈 HERE — no fallback
+    })
+}
 
   const deleteName = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
