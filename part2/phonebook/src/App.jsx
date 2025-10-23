@@ -28,13 +28,22 @@ const App = () => {
   const personToShow = persons.filter(person => person.name.trim().toLowerCase().includes(filteredName.toLowerCase()))
   
   const handleBackendError = (error, fallbackMessage) => {
-  console.log('Axios error object:', error)
-  console.log('Axios response:', error.response)
+  console.log('Axios full error object:', error)
 
   let backendMessage = fallbackMessage
 
-  // Fallback: sometimes data is in responseText
-  const data = error.response?.data || error.response?.responseText
+  // First try normal response data
+  let data = error.response?.data
+
+  // Fallback: sometimes Axios can't parse JSON when frontend/backend share the same port
+  if (!data && error.response?.request?.responseText) {
+    try {
+      data = JSON.parse(error.response.request.responseText)
+    } catch {
+      data = error.response.request.responseText
+    }
+  }
+
   if (data) {
     if (typeof data === 'string') backendMessage = data
     else if (data.error) backendMessage = data.error
@@ -51,14 +60,14 @@ const App = () => {
       const confirmUpdate = window.confirm(`${presentPerson.name} is already added to phonebook, replace the old number with a new one?`)
       if (confirmUpdate) {
         const updatedPerson =  {... presentPerson, number: newNumber}
-        personsServices
-        .update(presentPerson.id, updatedPerson).then(returnedPerson => {
-        setPersons(persons.map(p => p.id === presentPerson.id ? returnedPerson : p))
-        setNewName('')
-        setNewNumber('')
-        showNotification({type: 'success', message: `Number of ${presentPerson.name} is changed`})
-        })
-        .catch(error => handleBackendError(error, `Failed to update ${presentPerson.name}`))
+        personsServices.update(presentPerson.id, updatedPerson)
+  .then(returnedPerson => {
+    setPersons(persons.map(p => p.id === presentPerson.id ? returnedPerson : p))
+    setNewName('')
+    setNewNumber('')
+    showNotification({ type: 'success', message: `Number of ${presentPerson.name} is changed` })
+  })
+  .catch(error => handleBackendError(error, `Failed to update ${presentPerson.name}`))
 }
         return
       }
@@ -66,15 +75,14 @@ const App = () => {
     }
     
     const newPerson = {name: newName, number: newNumber}
-    personsServices
-    .create(newPerson)
-    .then(addedPerson => {
-      setPersons(persons.concat(addedPerson))
-      setNewName('')
-      setNewNumber('')
-      showNotification({type:'success', message: `Added ${newPerson.name}`})
-    })
-    .catch(error => handleBackendError(error, `Failed to add ${newPerson.name}`))
+    personsServices.create(newPerson)
+  .then(addedPerson => {
+    setPersons(persons.concat(addedPerson))
+    setNewName('')
+    setNewNumber('')
+    showNotification({ type:'success', message: `Added ${newPerson.name}` })
+  })
+  .catch(error => handleBackendError(error, `Failed to add ${newPerson.name}`))
   }
 
   
