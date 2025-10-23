@@ -19,14 +19,16 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :p
 // --- Routes ---
 app.post('/api/persons', (request, response, next) => {
   const { name, number } = request.body
-  if (!name || !number) {
-    return response.status(400).json({ error: 'name or number missing' })
-  }
+
+  // Create new Person — do NOT manually check name/number
   const person = new Person({ name, number })
+
   person
     .save()
-    .then(saved => response.json(saved))
-    .catch(error => next(error))
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(next) // Mongoose ValidationError will go to the error handler
 })
 
 app.get('/api/persons', (req, res, next) => {
