@@ -44,11 +44,7 @@ const App = () => {
         })
         .catch(error => {
           const backendError = error.response?.data?.error
-          if (backendError) {
-            showNotification({ type: 'error', message: backendError })
-          } else {
-            showNotification({ type: 'error', message: `Failed to update ${presentPerson.name}` })
-          }
+          showNotification({ type: 'error', message: backendError ?? `Failed to update ${presentPerson.name}` })
           setPersons(persons.filter(p => p.id !== presentPerson.id))
         })
         return
@@ -67,11 +63,7 @@ const App = () => {
     })
     .catch(error => {
       const backendError = error.response?.data?.error
-      if (backendError) {
-        showNotification({ type: 'error', message: backendError })
-      } else {
-      showNotification({ type: 'error', message: `Failed to add ${newPerson.name}` })
-      }
+      showNotification({ type: 'error', message: backendError ?? `Failed to add ${newPerson.name}` })
     })    
   }
     
