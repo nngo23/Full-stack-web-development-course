@@ -14,10 +14,9 @@ const App = () => {
 
   // Fetch all persons on mount
   useEffect(() => {
-    personsServices
-      .getAll()
-      .then(firstPersons => setPersons(firstPersons))
-      .catch(error => console.error('❌ Fetch failed:', error))
+    personsServices.getAll()
+      .then(res => setPersons(res.data))
+      .catch(err => console.error('❌ Fetch failed:', err))
   }, [])
 
   // Notification helper
@@ -45,12 +44,9 @@ const App = () => {
       )
       if (confirmUpdate) {
         const updatedPerson = { ...presentPerson, number: newNumber }
-        personsServices
-          .update(presentPerson.id, updatedPerson)
-          .then(returnedPerson => {
-            setPersons(
-              persons.map(p => (p.id === presentPerson.id ? returnedPerson : p))
-            )
+        personsServices.update(presentPerson.id, updatedPerson)
+          .then(res => {
+            setPersons(persons.map(p => p.id === presentPerson.id ? res.data : p))
             setNewName('')
             setNewNumber('')
             showNotification({
@@ -59,7 +55,7 @@ const App = () => {
             })
           })
           .catch(err => {
-            const backendMessage = err?.response?.data?.error
+            const backendMessage = err.response?.data?.error
             showNotification({
               type: 'error',
               message: backendMessage || `Failed to update ${presentPerson.name}`,
@@ -71,17 +67,16 @@ const App = () => {
 
     // Add new person
     const newPerson = { name: newName, number: newNumber }
-    personsServices
-      .create(newPerson)
+    personsServices.create(newPerson)
       .then(res => {
-        setPersons(persons.concat(res))
+        setPersons(persons.concat(res.data))
         setNewName('')
         setNewNumber('')
-        showNotification({ type: 'success', message: `Added ${res.name}` })
+        showNotification({ type: 'success', message: `Added ${res.data.name}` })
       })
       .catch(err => {
-        const backendMessage = err?.response?.data?.error
         console.log('❌ BACKEND ERROR DATA:', err.response?.data)
+        const backendMessage = err.response?.data?.error
         showNotification({ type: 'error', message: backendMessage || 'Failed to add person' })
       })
   }
@@ -89,13 +84,12 @@ const App = () => {
   // Delete person
   const deleteName = (id, name) => {
     if (window.confirm(`Delete ${name}?`)) {
-      personsServices
-        .remove(id)
+      personsServices.remove(id)
         .then(() => {
           setPersons(persons.filter(p => p.id !== id))
           showNotification({ type: 'success', message: `Deleted ${name}` })
         })
-        .catch(error => {
+        .catch(() => {
           showNotification({
             type: 'error',
             message: `Information of ${name} was already deleted from server`,
