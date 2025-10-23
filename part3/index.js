@@ -36,7 +36,7 @@ app.post('/api/persons', (request, response, next) => {
   const {name, number}=request.body 
   if (!name || !number) { 
     return response.status(400).json({error: 'name or number missing'})
-   } 
+  } 
   const person = new Person({name, number}) 
   person.save().then(saved_person =>
     response.json(saved_person)) 
@@ -86,7 +86,9 @@ const unknownEndpoint = (request, response) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message)
+  console.error('🔥 ERROR NAME:', error.name)
+  console.error('🔥 ERROR MESSAGE:', error.message)
+  console.error('🔥 ERROR OBJECT:', error)
   if (error.name === 'ValidationError') {
     const messages = Object.values(error.errors).map(e => e.message)
     return response.status(400).json({error: messages.join(', ') })
