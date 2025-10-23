@@ -49,14 +49,9 @@ app.put('/api/persons/:id', (request, response, next) => {
 
   Person.findByIdAndUpdate(request.params.id, {name, number}, {new: true, runValidators: true, context: 'query'})
     .then(person => {
-      if (!person) {return response.status(404).end()}
-      person.name = name
-      person.number = number
-      
-      return person.save().then((updatedPerson) => {
-        response.json(updatedPerson)
+      if (!person) return response.status(404).end()
+      response.json(updatedPerson)
       })
-    })
     .catch(error => next(error))
 })
 
@@ -93,7 +88,8 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
   if (error.name === 'ValidationError') {
-    return response.status(400).send({error: error.message})
+    const messages = Object.values(error.errors).map(e => e.message)
+    return response.status(400).json({ error: messages.join(', ') })
   } 
   if (error.name === 'CastError') {
     return response.status(400).send({error:'Invalid ID format'})

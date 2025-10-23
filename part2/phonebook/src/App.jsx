@@ -69,7 +69,6 @@ const App = () => {
     })
     .catch(error => {
       console.log('Full Axios error (create):', error)
-      console.log('Axios response:', error.response)
       const backendError = error.response?.data?.error
       if (backendError) {
         showNotification({ type: 'error', message: backendError })
