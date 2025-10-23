@@ -47,7 +47,7 @@ app.post('/api/persons', (request, response, next) => {
 app.put('/api/persons/:id', (request, response, next) => {
   const {name, number} = request.body
 
-  Person.findById(request.params.id, {name, number}, {new: true, runValidators: true, context: 'query'})
+  Person.findByIdAndUpdate(request.params.id, {name, number}, {new: true, runValidators: true, context: 'query'})
     .then(person => {
       if (!person) {return response.status(404).end()}
       person.name = name

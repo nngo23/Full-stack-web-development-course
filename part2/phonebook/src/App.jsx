@@ -61,6 +61,7 @@ const App = () => {
       showNotification({type:'success', message: `Added ${newPerson.name}`})
     })
     .catch(error => {
+      console.log('Error response:', error.response?.data)
       const backendError = error.response?.data?.error
       if (backendError) {
         showNotification({ type: 'error', message: backendError })
