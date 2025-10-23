@@ -6,7 +6,7 @@ const baseUrl = '/api/persons'
 const getAll = () => axios.get(baseUrl).then(res => res.data)
 
 const create = newPerson =>
-  axios.post(baseUrl, newPerson, { headers: { 'Content-Type': 'application/json' } })
+  axios.post(baseUrl, newPerson)
        .then(res => res.data)
 
 const update = (id, updatedPerson) =>
