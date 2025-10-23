@@ -34,9 +34,26 @@ const App = () => {
     setTimeout(() => setNotification({type: '', message: null}), 6000)
   }
 
-  const handleBackendError =(error) => {
-    const message = error.response?.data?.error || 'Server error'
-    showNotification({type: 'error', message})
+  const handleBackendError = (error, fallbackMessage = 'Server error') => {
+    console.log('Backend error:', error)
+
+    if (!error.response) {
+      showNotification({type: 'error', message: fallbackMessage})
+      return
+    }
+
+    const {data} = error.response
+    let message = fallbackMessage
+
+    if (data?.error) {
+      message = Array.isArray(data.error)
+        ? data.error.join(', ')
+        : data.error
+    } else if (data?.message) {
+      message = data.message
+    }
+
+    showNotification({type:'error', message})
   }
 
   const personToShow = persons.filter(person =>
