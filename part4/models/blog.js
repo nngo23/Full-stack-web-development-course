@@ -1,23 +1,12 @@
-require('dotenv').config()
 const mongoose = require('mongoose')
 
 mongoose.set('strictQuery', false)
-
-const mongoUrl = 'mongodb://localhost/bloglist'
-
-mongoose.connect(mongoUrl)
-  .then(() => {
-    console.log('connected to MongoDB')
-  })
-  .catch(error => {
-    console.error('error connecting to MongoDB:', error.message)
-  })
 
 const blogSchema = mongoose.Schema({
   title: String,
   author: String,
   url: String,
-  likes: Number,
+  likes: Number
 })
 
 blogSchema.set('toJSON', {
