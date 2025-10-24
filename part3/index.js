@@ -9,7 +9,7 @@ app.use(express.static('dist'))
 app.use(express.json())
 
 morgan.token('postPerson', (req) => (req.method === 'POST' ? JSON.stringify(req.body) : null))
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :postPerson'))
+app.use(morgan(':method :url :status :res[content-length] :response-time ms :postPerson'))
 
 app.post('/api/persons', (req, res, next) => {
   const { name, number } = req.body
@@ -54,7 +54,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'unknown endpoint' })
 })
 
-app.use((error, req, res, next) => {
+app.use((error, req, res, _next) => {
   if (error.name === 'ValidationError') {
     const messages = Object.values(error.errors).map(e => e.message)
     return res.status(400).json({ error: messages.join(', ') })
