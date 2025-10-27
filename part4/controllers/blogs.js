@@ -20,14 +20,6 @@ blogsRouter.get('/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-    return null
-}
-
 blogsRouter.post('/', async (req, res) => {
   const { title, author, url, likes } = req.body
 
@@ -35,7 +27,7 @@ blogsRouter.post('/', async (req, res) => {
     return res.status(400).json({ error: 'Title or URL is missing' })
   }
 
-  const decodedToken = jwt.verify(getTokenFrom(req), process.env.JWT_SECRET)
+  const decodedToken = jwt.verify(req.token, process.env.JWT_SECRET)
   if (!decodedToken.id) {
     return res.status(401).json({ error: 'token invalid' })
   }
