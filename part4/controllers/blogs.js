@@ -1,7 +1,7 @@
 const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
-//const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -20,47 +20,44 @@ blogsRouter.get('/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-//const getTokenFrom = request => {
- // const authorization = request.get('authorization')
-//  if (authorization && authorization.startsWith('Bearer ')) {
- //   return authorization.replace('Bearer ', '')
- // }
- // return null
-//}
+const getTokenFrom = request => {
+  const authorization = request.get('authorization')
+  if (authorization && authorization.startsWith('Bearer ')) {
+    return authorization.replace('Bearer ', '')
+  }
+    return null
+}
 
 blogsRouter.post('/', async (req, res) => {
   const { title, author, url, likes } = req.body
 
-  // Validate required fields
   if (!title || !url) {
     return res.status(400).json({ error: 'Title or URL is missing' })
   }
 
-  // Get all users from the database
-  const allUsers = await User.find({})
-  if (!allUsers.length) {
+  const decodedToken = jwt.verify(getTokenFrom(req), process.env.JWT_SECRET)
+  if (!decodedToken.id) {
+    return res.status(401).json({ error: 'token invalid' })
+  }
+
+  const user = await User.findById(decodedToken.id)
+  if (!user) {
     return res.status(400).json({ error: 'No users found in database' })
   }
 
-  // Determine which user should be the creator based on how many blogs exist
-  const blogCount = await Blog.countDocuments({})
-  const assignedUser = allUsers[blogCount % allUsers.length]  // cycles through users
-
-  // Create the new blog
   const newBlog = new Blog({
     title,
     author,
     url,
     likes: likes || 0,
-    user: assignedUser._id
+    user: user._id
   })
 
   const savedBlog = await newBlog.save()
 
-  // Update the user's blogs array
-  assignedUser.blogs = assignedUser.blogs || []
-  assignedUser.blogs.push(savedBlog._id)
-  await assignedUser.save()
+  user.blogs = user.blogs || []
+  user.blogs.push(savedBlog._id)
+  await user.save()
 
   res.status(201).json(savedBlog)
 })
