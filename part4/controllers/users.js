@@ -13,7 +13,7 @@ const validateUserInput = (username, password) => {
 }
 
 usersRouter.get('/', async (req, res) => {
-  const users = await User.find({}).populate('blogs')
+  const users = await User.find({}).populate('blogs', { url: 1, title: 1, author: 1 })
   res.json(users)
 })
 
@@ -37,5 +37,10 @@ usersRouter.post('/', async (req, res, next) => {
     })
 })
 
+usersRouter.delete('/:id', async (request, response) => {
+    await User.findByIdAndDelete(request.params.id)
+    response.status(204).end()
+      
+})
 
 module.exports = usersRouter

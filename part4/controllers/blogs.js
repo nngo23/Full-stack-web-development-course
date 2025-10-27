@@ -31,26 +31,36 @@ blogsRouter.get('/:id', (request, response, next) => {
 blogsRouter.post('/', async (req, res) => {
   const { title, author, url, likes } = req.body
 
-  if (!title || !url) 
-    return res.status(400).json({ error: 'title or url missing' })
+  // Validate required fields
+  if (!title || !url) {
+    return res.status(400).json({ error: 'Title or URL is missing' })
+  }
 
-  const users = await User.find({})
-  const user = users[0] // get the first user
-  if (!user) return res.status(400).json({ error: 'userId missing or not valid' })
+  // Get all users from the database
+  const allUsers = await User.find({})
+  if (!allUsers.length) {
+    return res.status(400).json({ error: 'No users found in database' })
+  }
 
-  const blog = new Blog({
+  // Determine which user should be the creator based on how many blogs exist
+  const blogCount = await Blog.countDocuments({})
+  const assignedUser = allUsers[blogCount % allUsers.length]  // cycles through users
+
+  // Create the new blog
+  const newBlog = new Blog({
     title,
     author,
     url,
     likes: likes || 0,
-    user: user._id
+    user: assignedUser._id
   })
 
-  const savedBlog = await blog.save()
+  const savedBlog = await newBlog.save()
 
- user.blogs = user.blogs || []
-user.blogs = user.blogs.concat(savedBlog._id)
-await user.save()
+  // Update the user's blogs array
+  assignedUser.blogs = assignedUser.blogs || []
+  assignedUser.blogs.push(savedBlog._id)
+  await assignedUser.save()
 
   res.status(201).json(savedBlog)
 })
