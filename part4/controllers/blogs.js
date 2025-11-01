@@ -2,6 +2,7 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const userExtractor = require('../middleware/userExtractor')
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -20,21 +21,16 @@ blogsRouter.get('/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-blogsRouter.post('/', async (req, res) => {
+blogsRouter.post('/', userExtractor, async (req, res) => {
   const { title, author, url, likes } = req.body
 
   if (!title || !url) {
     return res.status(400).json({ error: 'Title or URL is missing' })
   }
 
-  const decodedToken = jwt.verify(req.token, process.env.JWT_SECRET)
-  if (!decodedToken.id) {
-    return res.status(401).json({ error: 'token invalid' })
-  }
-
-  const user = await User.findById(decodedToken.id)
+  const user = req.user
   if (!user) {
-    return res.status(400).json({ error: 'No users found in database' })
+    return res.status(401).json({ error: 'Token missing or invalid' })
   }
 
   const newBlog = new Blog({
@@ -43,7 +39,7 @@ blogsRouter.post('/', async (req, res) => {
     url,
     likes: likes || 0,
     user: user._id
-  })
+  })  
 
   const savedBlog = await newBlog.save()
 
@@ -54,9 +50,23 @@ blogsRouter.post('/', async (req, res) => {
   res.status(201).json(savedBlog)
 })
 
-blogsRouter.delete('/:id', async (request, response) => {
+blogsRouter.delete('/:id', userExtractor, async (request, response) => {
+  const user = request.user
+  if (!user) {
+    return response.status(401).json({ error: 'token missing or invalid' })
+  }
+
+  const blog = await Blog.findById(request.params.id)
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' })
+  }
+
+  if  ( blog.user.toString() === user._id.toString() ) {
     await Blog.findByIdAndDelete(request.params.id)
     response.status(204).end()
+  } else {
+    response.status(403).json({ error: 'Only the creator can delete the blog' })
+  }
       
 })
 

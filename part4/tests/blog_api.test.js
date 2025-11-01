@@ -3,29 +3,38 @@ const supertest = require('supertest')
 const app = require('../app')
 const helper = require('./test_helper')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const api = supertest(app)
 
+let token = null
+
+beforeAll(async () => {
+  await User.deleteMany({})
+
+  const passwordHash = await helper.hashPassword('pass')
+  const adminUser = new User({ username: 'root', passwordHash })
+  await adminUser.save()
+
+  const loginResponse = await api
+    .post('/api/login')
+    .send({ username: 'root', password: 'pass' })
+
+  token = loginResponse.body.token
+
+})
+
 beforeEach(async () => {
   await Blog.deleteMany({})
+  const user = await User.findOne({ username: 'root' })
 
-  const initialBlogs = [
-      {
-      title: "TDD harms architecture",
-      author: "Robert C. Martin",
-      url: "http://blog.cleancoder.com/uncle-bob/2017/03/03/TDD-Harms-Architecture.html",
-      likes: 0
-      },
-      {
-      title: "Type wars",
-      author: "Robert C. Martin",
-      url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
-      likes: 2,
-      }  
-    ]
-
-  await Blog.insertMany(initialBlogs)
+  const initialBlogsWithUsers = helper.initialBlogs.map(b => ({
+    ...b,
+    user: user._id
+  }))
+  await Blog.insertMany(initialBlogsWithUsers)
 })
+
 
 describe('when there are some blogs initially', () => {
   test('blogs are returned as json', async () => {
@@ -60,6 +69,7 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -70,6 +80,17 @@ describe('addition of a new blog', () => {
     expect(titles).toContain('First class tests')
   })
 
+  test('fails with status 401 if token missing', async () => {
+      const newBlog = { 
+        title: "Travel blog",
+        author: "Anna Hathaway",
+        url: "http://travelblog.com",
+        likes: 50
+      }
+
+      await api.post('/api/blogs').send(newBlog).expect(401)
+    })
+
   test('sets likes to 0 if the property is not provided', async () => {
     const newBlog = {
       title: 'Food blog',
@@ -77,14 +98,14 @@ describe('addition of a new blog', () => {
       url: 'http://foodblog.com'
     }
 
-    const response = await api.post('/api/blogs').send(newBlog).expect(201)
+    const response = await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(newBlog).expect(201)
     expect(response.body.likes).toBe(0)
   })
 
   test('fails with status 400 if title or url missing', async () => {
     const newBlog = { author: 'Alice' }
 
-    await api.post('/api/blogs').send(newBlog).expect(400)
+    await api.post('/api/blogs').set('Authorization', `Bearer ${token}`).send(newBlog).expect(400)
   })
 })
 
@@ -93,7 +114,7 @@ describe('deletion of a blog', () => {
     const blogsBefore = await helper.blogsInDb()
     const blogToDelete = blogsBefore[0]
 
-    await api.delete(`/api/blogs/${blogToDelete.id}`).expect(204)
+    await api.delete(`/api/blogs/${blogToDelete.id}`).set('Authorization', `Bearer ${token}`).expect(204)
 
     const blogsAfter = await helper.blogsInDb()
     expect(blogsAfter).toHaveLength(helper.initialBlogs.length - 1)
