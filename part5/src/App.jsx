@@ -11,16 +11,16 @@ import Togglable from './components/Togglable'
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const blogFormRef = useRef()
-  const [username, setUsername] = useState('') 
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState({ type: '', message: null })
-  const sortBlogs = (blogs) => [...blogs].sort((a, b) => b.likes - a.likes) 
-  
+  const sortBlogs = (blogs) => [...blogs].sort((c, d) => d.likes - c.likes)
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   const showNotification = ({ type, message }) => {
@@ -43,7 +43,7 @@ const App = () => {
       const user = await loginService.login({ username, password })
       window.localStorage.setItem(
         'loggedBlogappUser', JSON.stringify(user)
-      ) 
+      )
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
@@ -77,7 +77,7 @@ const App = () => {
       const updatedBlog = await blogService.update(blogObject.id, { ...blogObject, likes: blogObject.likes +1 })
       const displayedBlog = { ...updatedBlog, user: blogObject.user }
       setBlogs(blogs.map(b => (b.id === blogObject.id ? displayedBlog : b)))
-    
+
     } catch (error) {
       console.error('Error updating likes:', error)
     }
@@ -90,8 +90,8 @@ const App = () => {
         setBlogs(blogs.filter(b => b.id !== blog.id))
         showNotification({ type: 'success', message: `Blog ${blog.title} removed successfully` })
       } catch (error) {
-      console.error('Error removing blog:', error) 
-      showNotification({ type: 'error', message: 'Error removing blog' })
+        console.error('Error removing blog:', error)
+        showNotification({ type: 'error', message: 'Error removing blog' })
       }
     }
   }
@@ -100,7 +100,7 @@ const App = () => {
     <div>
       <h2>Blogs</h2>
       {notification.message && <Notification type={notification.type} message={notification.message} />}
-      {!user && 
+      {!user &&
         <Togglable buttonLabel='login'>
           <LoginForm
             handleLogin={handleLogin}
@@ -109,12 +109,12 @@ const App = () => {
             handleUsername={({ target }) => setUsername(target.value)}
             handlePassword={({ target }) => setPassword(target.value)}
           />
-        </Togglable>      
+        </Togglable>
       }
       {user && (
         <div>
           <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-          
+
           <Togglable buttonLabel="new blog" ref={blogFormRef}>
             <BlogForm createBlog={addBlog} />
           </Togglable>

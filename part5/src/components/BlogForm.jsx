@@ -7,11 +7,11 @@ const BlogForm = ({ createBlog }) => {
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    createBlog({ 
+    createBlog({
       title: newTitle,
       author: newAuthor,
       url: newUrl
-     })
+    })
     setNewTitle('')
     setNewAuthor('')
     setNewUrl('')
@@ -21,22 +21,22 @@ const BlogForm = ({ createBlog }) => {
     <div>
       <h2>Create new</h2>
       <form onSubmit={handleSubmit}>
-        <div> 
-            title: <input value={newTitle} 
-            onChange={({ target }) => setNewTitle(target.value)} /> 
-        </div> 
-        <div> 
-            author: <input value={newAuthor} 
-            onChange={({ target }) => setNewAuthor(target.value)} /> 
-        </div> 
-        <div> 
-            url: <input value={newUrl} 
-            onChange={({ target }) => setNewUrl(target.value)} /> 
-        </div> 
         <div>
-            <button type="submit">create</button>
-        </div> 
-      </form> 
+            title: <input value={newTitle}
+            onChange={({ target }) => setNewTitle(target.value)} />
+        </div>
+        <div>
+            author: <input value={newAuthor}
+            onChange={({ target }) => setNewAuthor(target.value)} />
+        </div>
+        <div>
+            url: <input value={newUrl}
+            onChange={({ target }) => setNewUrl(target.value)} />
+        </div>
+        <div>
+          <button type="submit">create</button>
+        </div>
+      </form>
     </div>
   )
 }
