@@ -15,7 +15,8 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState({ type: '', message: null })
-     
+  const sortBlogs = (blogs) => [...blogs].sort((a, b) => b.likes - a.likes) 
+  
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
@@ -60,7 +61,7 @@ const App = () => {
       setBlogs(blogs.concat(addedBlog))
       showNotification({ type: 'success', message: `a new blog ${addedBlog.title} by ${addedBlog.author} added` })
     } catch (error) {
-       console.error('Error adding blog:', error)
+      console.error('Error adding blog:', error)
       showNotification({ type: 'error', message: 'error adding blog' })
     }
   }
@@ -79,6 +80,19 @@ const App = () => {
     
     } catch (error) {
       console.error('Error updating likes:', error)
+    }
+  }
+
+  const removeBlog = async (blog) => {
+    if (window.confirm(`Remove blog ${blog.title} by ${blog.author}`)) {
+      try {
+        await blogService.remove(blog.id)
+        setBlogs(blogs.filter(b => b.id !== blog.id))
+        showNotification({ type: 'success', message: `Blog ${blog.title} removed successfully` })
+      } catch (error) {
+      console.error('Error removing blog:', error) 
+      showNotification({ type: 'error', message: 'Error removing blog' })
+      }
     }
   }
 
@@ -108,8 +122,8 @@ const App = () => {
       )}
 
       <Togglable buttonLabel="show blogs">
-        {blogs.map(blog => (
-          <Blog key={blog.id} blog={blog} updateLike={updateLike}/>
+        {sortBlogs(blogs).map(blog => (
+          <Blog key={blog.id} blog={blog} user={user} updateLike={updateLike} removeBlog={removeBlog}/>
         ))}
       </Togglable>
 
