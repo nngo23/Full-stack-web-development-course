@@ -15,8 +15,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState({ type: '', message: null })
-  
-   
+     
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
@@ -72,6 +71,17 @@ const App = () => {
     blogService.setToken(null)
   }
 
+  const updateLike = async (blogObject) => {
+    try {
+      const updatedBlog = await blogService.update(blogObject.id, { ...blogObject, likes: blogObject.likes +1 })
+      const displayedBlog = { ...updatedBlog, user: blogObject.user }
+      setBlogs(blogs.map(b => (b.id === blogObject.id ? displayedBlog : b)))
+    
+    } catch (error) {
+      console.error('Error updating likes:', error)
+    }
+  }
+
   return (
     <div>
       <h2>Blogs</h2>
@@ -99,7 +109,7 @@ const App = () => {
 
       <Togglable buttonLabel="show blogs">
         {blogs.map(blog => (
-          <Blog key={blog.id} blog={blog} />
+          <Blog key={blog.id} blog={blog} updateLike={updateLike}/>
         ))}
       </Togglable>
 
