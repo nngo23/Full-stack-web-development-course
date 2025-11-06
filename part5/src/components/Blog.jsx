@@ -16,15 +16,15 @@ const Blog = ({ blog, user, updateLike, removeBlog }) => {
   }
 
   return (
-    <div style={blogStyle}>
-      <p>
-        {blog.title} {blog.author}
+    <div style={blogStyle} className="blog">
+      <div className="blog title">
+        {blog.title} by {blog.author}
         <button onClick={toggleVisibility}>
           {visible ? 'hide' : 'view'}</button>
-      </p>
+      </div>
 
       {visible && (
-        <div>
+        <div className="blog details">
           <p>{blog.url}</p>
           <p>likes {blog.likes} <button onClick={() => updateLike(blog)}>like</button></p>
           <p>{blog.username || blog.user.name}</p>
