@@ -7,7 +7,6 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Togglable from './components/Togglable'
 
-
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const blogFormRef = useRef()
@@ -17,10 +16,17 @@ const App = () => {
   const [notification, setNotification] = useState({ type: '', message: null })
   const sortBlogs = (blogs) => [...blogs].sort((c, d) => d.likes - c.likes)
 
+  const fetchBlogs = async () => {
+    try {
+      const data = await blogService.getAll()
+      setBlogs(data)
+    } catch (error) {
+      console.error('Fetch blogs failed:', error)
+    }
+  }
+
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )
+    fetchBlogs()
   }, [])
 
   const showNotification = ({ type, message }) => {
