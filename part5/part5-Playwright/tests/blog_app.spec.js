@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { resetDatabase, createUser, login, createBlog } = require('./helper')
+const { frontendURL, resetDatabase, createUser, login, createBlog } = require('./helper')
 
 test.describe('Blog application', () => {
 
@@ -9,7 +9,7 @@ test.describe('Blog application', () => {
     await page.addInitScript(() => {
       window.BACKEND_PORT = '3004'
     })
-    await page.goto('http://localhost:5173')
+    await page.goto(frontendURL)
   })
 
   test('login with correct credentials', async ({ page }) => {
