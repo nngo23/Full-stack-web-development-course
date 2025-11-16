@@ -1,5 +1,5 @@
 const { test, expect } = require('@playwright/test')
-const { resetDatabase, createUser, loginWith, createBlog } = require('./helper')
+const { resetDatabase, createUser, login, createBlog } = require('./helper')
 
 test.describe('Blog application', () => {
 
@@ -13,23 +13,23 @@ test.describe('Blog application', () => {
   })
 
   test('login with correct credentials', async ({ page }) => {
-    await loginWith({ page, username: 'helminguyen', password: 'password' })
+    await login({ page, username: 'helminguyen', password: 'password' })
     await expect(page.getByText('Helmi Nguyen')).toBeVisible()
   })
 
   test('login fails with wrong password', async ({ page }) => {
     await expect(async () => {
-      await loginWith({ page, username: 'helminguyen', password: 'xyzo' })
+      await login({ page, username: 'helminguyen', password: 'xyzo' })
     }).rejects.toThrow(/invalid username or password/) 
   })
 
   test('when logged in, can create a new blog', async ({ page }) => {
-    await loginWith({ page, username: 'helminguyen', password: 'password' })
+    await login({ page, username: 'helminguyen', password: 'password' })
     await createBlog({ page, title: 'Beauty blog', author: 'Author A', url: 'http://www.beautyblog.fi' })
   })
 
   test('when logged in, a blog can be liked', async ({ page }) => {
-    await loginWith({ page, username: 'helminguyen', password: 'password' })
+    await login({ page, username: 'helminguyen', password: 'password' })
 
     const blog = await createBlog({
       page,

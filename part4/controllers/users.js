@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
 const User = require('../models/user')
 
-const validateUserInput = (username, password) => {
+const validateUser = (username, password) => {
   if (!username || username.length < 3) {
     return 'Username must be required and have at least 3 characters'
   }
@@ -20,7 +20,7 @@ usersRouter.get('/', async (req, res) => {
 usersRouter.post('/', async (req, res, next) => {
   const { username, name, password } = req.body
 
-  const validationError = validateUserInput(username, password)
+  const validationError = validateUser(username, password)
   if (validationError) return res.status(400).json({ error: validationError })
 
   const presentUser = await User.findOne({ username })
@@ -37,9 +37,9 @@ usersRouter.post('/', async (req, res, next) => {
     })
 })
 
-usersRouter.delete('/:id', async (request, response) => {
-    await User.findByIdAndDelete(request.params.id)
-    response.status(204).end()
+usersRouter.delete('/:id', async (req, res) => {
+    await User.findByIdAndDelete(req.params.id)
+    res.status(204).end()
       
 })
 

@@ -1,5 +1,4 @@
 import { request } from '@playwright/test'
-const { expect } = require('@playwright/test')
 
 const backendURL = 'http://localhost:3004'   
 const frontendURL = 'http://localhost:5173' 
@@ -8,14 +7,14 @@ const resetDatabase = async () => {
   const api = await request.newContext({ baseURL: backendURL })
 
   let success = false
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 5; i++) {
     try {
       await api.post('/api/testing/reset')
       success = true
       break
     } catch (err) {
-      await new Promise(res => setTimeout(res, 500))
-    }
+      await new Promise(res => setTimeout(res, 300))
+   }
   }
 
   await api.dispose() 
@@ -29,7 +28,7 @@ const createUser = async ({ request, username, name, password }) => {
   })
 }
 
-const loginWith = async ({ page, username, password }) => {
+const login = async ({ page, username, password }) => {
   const loginRes = await page.request.post(`${backendURL}/api/login`, {
     data: { username, password },
   })
@@ -73,12 +72,13 @@ const createBlog = async ({ page, title, author, url }) => {
 
   return blog
 }
+
 module.exports = {
   backendURL,
   frontendURL,
   resetDatabase,
   createUser,
-  loginWith,
+  login,
   createBlog,
 }
 
