@@ -26,4 +26,18 @@ const createNew = async (content) => {
   return await response.json()
 }
 
-export default { getAll, createNew}
+const increaseVote = async (anecdote) => {
+  const response = await fetch(`${url}/${anecdote.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...anecdote, votes: anecdote.votes + 1 }),
+  })
+
+  if (!response.ok) {
+    throw new Error('Failed to update vote')
+  }
+  
+  return await response.json()
+}
+
+export default { getAll, createNew, increaseVote }
