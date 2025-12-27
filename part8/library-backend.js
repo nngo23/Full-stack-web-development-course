@@ -1,5 +1,6 @@
 const { ApolloServer } = require("@apollo/server");
 const { startStandaloneServer } = require("@apollo/server/standalone");
+const { GraphQLError } = require("graphql");
 
 let authors = [
   {
@@ -93,35 +94,57 @@ let books = [
   },
 ];
 
-/*
-  you can remove the placeholder query once your first one has been implemented 
-*/
-
 const typeDefs = /* GraphQL */ `
   type Book {
     title: String!
+    author: String!
+    published: Int!
+    genres: [String!]
   }
+
   type Author {
     name: String!
+    born: Int
     bookCount: Int
   }
   type Query {
     bookCount: Int
     authorCount: Int
-    allBooks(author: String): [Book!]!
+    allBooks(author: String, genres: String): [Book!]!
     allAuthors: [Author!]!
   }
+  type Mutation {
+    addBook(
+      title: String!
+      author: String!
+      published: Int!
+      genres: [String!]
+    ): Book
+    editAuthor(name: String!, born: Int): Author
+  }
 `;
+
+const { v1: uuid } = require("uuid");
 
 const resolvers = {
   Query: {
     bookCount: () => books.length,
     authorCount: () => authors.length,
     allBooks: (root, args) => {
-      if (!args.author) {
-        return books;
+      let filteredBooks = books;
+
+      if (args.author) {
+        filteredBooks = filteredBooks.filter(
+          (book) => book.author === args.author
+        );
       }
-      return books.filter((book) => book.author === args.author);
+      if (args.genres) {
+        filteredBooks = filteredBooks.filter((book) =>
+          book.genres.includes(args.genres)
+        );
+      }
+
+      return filteredBooks;
     },
     allAuthors: () => {
       return authors.map((author) => {
@@ -130,9 +153,45 @@ const resolvers = {
         ).length;
         return {
           name: author.name,
+          born: author.born || null,
           bookCount: bookCount,
         };
       });
+    },
+  },
+  Mutation: {
+    addBook: (root, args) => {
+      if (books.find((b) => b.title === args.title)) {
+        throw new GraphQLError("Name must be unique", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            invalidArgs: args.name,
+          },
+        });
+      }
+      const newBook = {
+        ...args,
+        id: uuid(),
+      };
+      books = books.concat(newBook);
+      if (!authors.find((a) => a.name === args.author)) {
+        const newAuthor = {
+          name: args.author,
+          born: args.born || null,
+          id: uuid(),
+        };
+        authors = authors.concat(newAuthor);
+      }
+      return newBook;
+    },
+    editAuthor: (root, args) => {
+      const author = authors.find((a) => a.name === args.name);
+      if (!author) {
+        return null;
+      }
+      const updatedAuthor = { ...author, born: args.born };
+      authors = authors.map((a) => (a.name === args.name ? updatedAuthor : a));
+      return updatedAuthor;
     },
   },
 };
