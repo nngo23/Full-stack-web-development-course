@@ -27,6 +27,27 @@ const query = gql`
   }
 `;
 
+const CREATE_BOOK = gql`
+  mutation createBook(
+    $title: String!
+    $author: String!
+    $published: Int!
+    $genres: [String!]!
+  ) {
+    addBook(
+      title: $title
+      author: $author
+      published: $published
+      genres: $genres
+    ) {
+      title
+      author
+      published
+      genres
+    }
+  }
+`;
+
 client.query({ query }).then((response) => {
   console.log(response.data);
 });
