@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { ALL_AUTHORS, EDIT_BORN } from "../queries.jsx";
 
-const Authors = (props, setError) => {
+const Authors = (props) => {
   const [name, setName] = useState("");
   const [born, setBorn] = useState("");
 
@@ -11,11 +11,6 @@ const Authors = (props, setError) => {
 
   const [editBorn] = useMutation(EDIT_BORN, {
     refetchQueries: [{ query: ALL_AUTHORS }],
-    onCompleted: (data) => {
-      if (!data.editNumber) {
-        setError("person not found");
-      }
-    },
   });
 
   if (result.loading) {
@@ -53,13 +48,17 @@ const Authors = (props, setError) => {
       </table>
       <h3>Set birthyear</h3>
       <form onSubmit={update}>
-        <div>
+        <label>
           name
-          <input
-            value={name}
-            onChange={({ target }) => setName(target.value)}
-          />
-        </div>
+          <select name="author name" onChange={(e) => setName(e.target.value)}>
+            <option value="">select author</option>
+            {result.data.allAuthors.map((a) => (
+              <option key={a.name} value={a.name}>
+                {a.name}
+              </option>
+            ))}
+          </select>
+        </label>
         <div>
           born
           <input
