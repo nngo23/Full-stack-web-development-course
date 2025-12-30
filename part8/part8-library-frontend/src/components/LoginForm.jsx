@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client/react";
 import { LOGIN } from "../queries.jsx";
 
-const LoginForm = ({ setError, setToken }) => {
+const LoginForm = ({ show, setToken, setError }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
@@ -35,6 +35,7 @@ const LoginForm = ({ setError, setToken }) => {
           <input
             value={username}
             onChange={({ target }) => setUsername(target.value)}
+            style={{ backgroundColor: "yellow" }}
           />
         </div>
         <div>
@@ -43,9 +44,12 @@ const LoginForm = ({ setError, setToken }) => {
             type="password"
             value={password}
             onChange={({ target }) => setPassword(target.value)}
+            style={{ backgroundColor: "yellow" }}
           />
         </div>
-        <button type="submit">login</button>
+        <button type="submit" style={{ backgroundColor: "lightgreen" }}>
+          login
+        </button>
       </form>
     </div>
   );

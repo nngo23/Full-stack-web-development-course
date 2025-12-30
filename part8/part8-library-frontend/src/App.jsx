@@ -9,6 +9,7 @@ import LoginForm from "./components/LoginForm";
 const App = () => {
   const [page, setPage] = useState("authors");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [token, setToken] = useState(null);
   const client = useApolloClient();
 
   const notification = (message, time = 4000) => {
@@ -24,36 +25,33 @@ const App = () => {
     await client.resetStore();
   };
 
-  const [token, setToken] = useState(null);
-  if (!token) {
-    return (
-      <div>
-        <Notification errorMessage={errorMessage} />
-        <h2>Login</h2>
-        <LoginForm setToken={setToken} setError={notification} />
-      </div>
-    );
-  }
-
   return (
     <div>
+      <Notification errorMessage={errorMessage} />
       <div>
         <button onClick={() => setPage("authors")}>authors</button>
         <button onClick={() => setPage("books")}>books</button>
-        <button onClick={() => setPage("add")}>add book</button>
+        {!token && <button onClick={() => setPage("login")}>login</button>}
+        {token && <button onClick={() => setPage("add")}>add book</button>}
+        {token && <button onClick={logout}>logout</button>}
       </div>
-      <Notification errorMessage={errorMessage} />
-      <button onClick={logout}>logout</button>
 
       <Authors
         show={page === "authors"}
         token={token}
         setError={notification}
       />
-
       <Books show={page === "books"} token={token} setError={notification} />
-
-      <NewBook show={page === "add"} token={token} setError={notification} />
+      {!token && page === "login" && (
+        <LoginForm
+          show={page === "login"}
+          setToken={setToken}
+          setError={notification}
+        />
+      )}
+      {token && page === "add" && (
+        <NewBook show={page === "add"} token={token} setError={notification} />
+      )}
     </div>
   );
 };
