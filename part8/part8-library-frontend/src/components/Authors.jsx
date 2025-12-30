@@ -5,7 +5,7 @@ import { ALL_AUTHORS, EDIT_BORN } from "../queries.jsx";
 
 const Authors = (props) => {
   const [name, setName] = useState("");
-  const [born, setBorn] = useState("");
+  const [setBornTo, setSetBornTo] = useState("");
 
   const result = useQuery(ALL_AUTHORS);
 
@@ -22,9 +22,11 @@ const Authors = (props) => {
   }
   const update = (event) => {
     event.preventDefault();
-    editBorn({ variables: { name, born: parseInt(born) } });
+    editBorn({
+      variables: { name, setBornTo: parseInt(setBornTo) },
+    });
     setName("");
-    setBorn("");
+    setSetBornTo("");
   };
 
   return (
@@ -63,8 +65,8 @@ const Authors = (props) => {
           born
           <input
             type="number"
-            value={born}
-            onChange={({ target }) => setBorn(target.value)}
+            value={setBornTo}
+            onChange={({ target }) => setSetBornTo(target.value)}
           />
         </div>
         <button type="submit">update author</button>

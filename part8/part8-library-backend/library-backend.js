@@ -34,6 +34,7 @@ const typeDefs = /* GraphQL */ `
   type Author {
     name: String!
     born: Int
+    bookCount: Int
     id: ID!
   }
   type User {
@@ -67,6 +68,12 @@ const typeDefs = /* GraphQL */ `
 `;
 
 const resolvers = {
+  Author: {
+    bookCount: async (root) => {
+      const count = await Book.countDocuments({ author: root._id });
+      return count;
+    },
+  },
   Query: {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount: async () => Author.collection.countDocuments(),
