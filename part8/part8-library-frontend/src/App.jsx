@@ -24,6 +24,7 @@ const App = () => {
     setToken(null);
     localStorage.clear();
     await client.resetStore();
+    setPage("login");
   };
 
   return (
@@ -40,12 +41,8 @@ const App = () => {
         {token && <button onClick={logout}>logout</button>}
       </div>
 
-      <Authors
-        show={page === "authors"}
-        token={token}
-        setError={notification}
-      />
-      <Books show={page === "books"} token={token} setError={notification} />
+      <Authors show={page === "authors"} token={token} />
+      <Books show={page === "books"} token={token} />
       {!token && page === "login" && (
         <LoginForm
           show={page === "login"}

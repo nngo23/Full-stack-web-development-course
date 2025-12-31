@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useMutation } from "@apollo/client/react";
-import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from "../queries.jsx";
+import { useMutation, useApolloClient } from "@apollo/client/react";
+import { ALL_AUTHORS, BOOKS_BY_GENRE, CREATE_BOOK } from "../queries.jsx";
 
-const NewBook = (props) => {
+const NewBook = ({ show, token, setError }) => {
+  const client = useApolloClient();
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
   const [published, setPublished] = useState("");
@@ -10,7 +11,56 @@ const NewBook = (props) => {
   const [genres, setGenres] = useState([]);
 
   const [createBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }],
+    onError: (error) => {
+      const messages =
+        error.graphQLErrors.map((e) => e.message).join("\n") ||
+        "An error occurred";
+      setError(messages);
+    },
+    update: (cache, response) => {
+      const addedBook = response.data.addBook;
+      cache.updateQuery(
+        { query: BOOKS_BY_GENRE, variables: { genre: "" } },
+        (data) => {
+          return {
+            allBooks: data?.allBooks
+              ? [...data.allBooks, addedBook]
+              : [addedBook],
+          };
+        }
+      );
+
+      addedBook.genres.forEach((g) => {
+        cache.updateQuery(
+          { query: BOOKS_BY_GENRE, variables: { genre: g } },
+          (data) => {
+            return {
+              allBooks: data?.allBooks
+                ? [...data.allBooks, addedBook]
+                : [addedBook],
+            };
+          }
+        );
+      });
+
+      cache.updateQuery({ query: ALL_AUTHORS }, (data) => {
+        const allAuthors = data.allAuthors;
+        const normalizedName = addedBook.author.name.trim();
+        const exists = allAuthors.find((a) => a.name.trim() === normalizedName);
+        if (exists) {
+          return {
+            allAuthors: allAuthors.map((a) =>
+              a.name.trim() === normalizedName
+                ? { ...a, name: normalizedName, bookCount: a.bookCount + 1 }
+                : a
+            ),
+          };
+        }
+        return {
+          allAuthors: allAuthors.concat(addedBook.author),
+        };
+      });
+    },
   });
 
   const addGenre = () => {
@@ -21,11 +71,15 @@ const NewBook = (props) => {
   const submit = async (event) => {
     event.preventDefault();
 
-    createBook({
+    await createBook({
       variables: { title, author, published: Number(published), genres },
     });
 
     console.log("add book...");
+
+    client.refetchQueries({
+      include: [BOOKS_BY_GENRE],
+    });
 
     setTitle("");
     setPublished("");
@@ -34,7 +88,7 @@ const NewBook = (props) => {
     setGenre("");
   };
 
-  if (!props.show) {
+  if (!show) {
     return null;
   }
 

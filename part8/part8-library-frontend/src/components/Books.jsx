@@ -4,18 +4,16 @@ import { BOOKS_BY_GENRE } from "../queries.jsx";
 
 const Books = (props) => {
   const [genre, setGenre] = useState(null);
-  const { data: result, loading: loading } = useQuery(BOOKS_BY_GENRE, {
+
+  const { data, loading, refetch } = useQuery(BOOKS_BY_GENRE, {
     variables: { genre: genre || "" },
   });
 
-  if (!props.show) {
-    return null;
-  }
-  if (loading) {
-    return <div>loading...</div>;
-  }
-  const booksByGenre = result?.allBooks || [];
-  const genres = [...new Set(booksByGenre.flatMap((b) => b.genres))];
+  if (!props.show) return null;
+  if (loading) return <div>loading...</div>;
+
+  const booksByGenre = data?.allBooks || [];
+  const allGenres = [...new Set(booksByGenre.flatMap((b) => b.genres))];
 
   return (
     <div>
@@ -40,12 +38,14 @@ const Books = (props) => {
         </tbody>
       </table>
       <div>
-        {genres.map((g) => (
-          <button key={g} onClick={() => setGenre(g)}>
+        {allGenres.map((g) => (
+          <button key={g} onClick={() => setGenre(g) && refetch({ genre: g })}>
             {g}
           </button>
         ))}
-        <button onClick={() => setGenre(null)}>all genres</button>
+        <button onClick={() => setGenre(null) && refetch({ genre: "" })}>
+          all genres
+        </button>
       </div>
     </div>
   );
