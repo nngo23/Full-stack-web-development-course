@@ -1,3 +1,5 @@
+import { isNotNumber } from "./utils";
+
 interface result {
   periodLength: number;
   trainingDays: number;
@@ -27,7 +29,7 @@ const calculateExercises = (
     ratingDescription = "not too bad but could be better";
   } else {
     rating = 3;
-    ratingDescription = "Great job! Target achieved";
+    ratingDescription = "Great job! Target reached";
   }
   return {
     periodLength,
@@ -40,4 +42,24 @@ const calculateExercises = (
   };
 };
 
-console.log(calculateExercises([3, 0, 2, 4.5, 0, 3, 1], 2));
+try {
+  const args = process.argv;
+  const target = args[2];
+  const hours = args.slice(3);
+
+  if (!target || hours.length === 0) {
+    throw new Error("Target and daily exercise hours must be provided");
+  }
+
+  if (isNotNumber(target) || hours.some((h) => isNotNumber(h))) {
+    throw new Error("Arguments must be numeric values");
+  }
+
+  console.log(calculateExercises(hours.map(Number), Number(target)));
+} catch (error: unknown) {
+  let errorMessage = "Something went wrong.";
+  if (error instanceof Error) {
+    errorMessage += " Error: " + error.message;
+  }
+  console.log(errorMessage);
+}

@@ -1,5 +1,7 @@
+import { isNotNumber } from "./utils";
+
 const calculateBmi = (height: number, weight: number): string => {
-  const bmi = weight / ((height * height) / 10000);
+  const bmi = weight / (height / 100) ** 2;
   if (bmi < 18.5) {
     return "Underweight";
   } else if (bmi < 25) {
@@ -10,4 +12,24 @@ const calculateBmi = (height: number, weight: number): string => {
   return "Obese";
 };
 
-console.log(calculateBmi(180, 74));
+try {
+  const args = process.argv;
+  const height = args[2];
+  const weight = args[3];
+
+  if (!height || !weight) {
+    throw new Error("Height and weight must be provided");
+  }
+
+  if (isNotNumber(height) || isNotNumber(weight)) {
+    throw new Error("Arguments must be numeric values");
+  }
+
+  console.log(calculateBmi(Number(height), Number(weight)));
+} catch (err: unknown) {
+  let message = "An error occurred.";
+  if (err instanceof Error) {
+    message += " " + err.message;
+  }
+  console.log(message);
+}
