@@ -56,10 +56,10 @@ try {
   }
 
   console.log(calculateExercises(hours.map(Number), Number(target)));
-} catch (error: unknown) {
-  let errorMessage = "Something went wrong.";
-  if (error instanceof Error) {
-    errorMessage += " Error: " + error.message;
+} catch (err: unknown) {
+  let message = "An error occurred.";
+  if (err instanceof Error) {
+    message += " " + err.message;
   }
-  console.log(errorMessage);
+  console.log(message);
 }

@@ -1,6 +1,6 @@
 import { isNotNumber } from "./utils";
 
-const calculateBmi = (height: number, weight: number): string => {
+export const calculateBmi = (height: number, weight: number): string => {
   const bmi = weight / (height / 100) ** 2;
   if (bmi < 18.5) {
     return "Underweight";
@@ -11,25 +11,26 @@ const calculateBmi = (height: number, weight: number): string => {
   }
   return "Obese";
 };
+if (require.main === module) {
+  try {
+    const args = process.argv;
+    const height = args[2];
+    const weight = args[3];
 
-try {
-  const args = process.argv;
-  const height = args[2];
-  const weight = args[3];
+    if (!height || !weight) {
+      throw new Error("Height and weight must be provided");
+    }
 
-  if (!height || !weight) {
-    throw new Error("Height and weight must be provided");
+    if (isNotNumber(height) || isNotNumber(weight)) {
+      throw new Error("Arguments must be numeric values");
+    }
+
+    console.log(calculateBmi(Number(height), Number(weight)));
+  } catch (err: unknown) {
+    let message = "An error occurred.";
+    if (err instanceof Error) {
+      message += " " + err.message;
+    }
+    console.log(message);
   }
-
-  if (isNotNumber(height) || isNotNumber(weight)) {
-    throw new Error("Arguments must be numeric values");
-  }
-
-  console.log(calculateBmi(Number(height), Number(weight)));
-} catch (err: unknown) {
-  let message = "An error occurred.";
-  if (err instanceof Error) {
-    message += " " + err.message;
-  }
-  console.log(message);
 }
