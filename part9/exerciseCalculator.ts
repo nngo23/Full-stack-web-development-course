@@ -1,16 +1,16 @@
 import { isNotNumber } from "./utils";
 
-interface result {
+export interface result {
   periodLength: number;
   trainingDays: number;
-  success: Boolean;
+  success: boolean;
   rating: 1 | 2 | 3;
   ratingDescription: string;
   target: number;
   average: number;
 }
 
-const calculateExercises = (
+export const calculateExercises = (
   dailyExerciseHours: number[],
   target: number
 ): result => {
@@ -41,25 +41,26 @@ const calculateExercises = (
     average,
   };
 };
+if (require.main === module) {
+  try {
+    const args = process.argv;
+    const target = args[2];
+    const hours = args.slice(3);
 
-try {
-  const args = process.argv;
-  const target = args[2];
-  const hours = args.slice(3);
+    if (!target || hours.length === 0) {
+      throw new Error("Target and daily exercise hours must be provided");
+    }
 
-  if (!target || hours.length === 0) {
-    throw new Error("Target and daily exercise hours must be provided");
+    if (isNotNumber(target) || hours.some((h) => isNotNumber(h))) {
+      throw new Error("Arguments must be numeric values");
+    }
+
+    console.log(calculateExercises(hours.map(Number), Number(target)));
+  } catch (err: unknown) {
+    let message = "An error occurred.";
+    if (err instanceof Error) {
+      message += " " + err.message;
+    }
+    console.log(message);
   }
-
-  if (isNotNumber(target) || hours.some((h) => isNotNumber(h))) {
-    throw new Error("Arguments must be numeric values");
-  }
-
-  console.log(calculateExercises(hours.map(Number), Number(target)));
-} catch (err: unknown) {
-  let message = "An error occurred.";
-  if (err instanceof Error) {
-    message += " " + err.message;
-  }
-  console.log(message);
 }
