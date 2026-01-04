@@ -18,7 +18,7 @@ const App = () => {
     });
   }, []);
 
-  const dairyCreation = async (event: React.SyntheticEvent) => {
+  const handleSubmit = async (event: React.SyntheticEvent) => {
     event.preventDefault();
     try {
       await createDiary({ comment, date, weather, visibility }).then(
@@ -47,28 +47,57 @@ const App = () => {
     }
   };
 
+  const weatherOptions: Weather[] = [
+    "windy",
+    "stormy",
+    "cloudy",
+    "rainy",
+    "sunny",
+  ];
+  const visibilityOptions: Visibility[] = ["poor", "ok", "good", "great"];
+
   return (
     <div>
       <Notification errorMessage={err} />
       <h2>Add new entry</h2>
-      <form onSubmit={dairyCreation}>
-        <div>
+      <form onSubmit={handleSubmit}>
+        <label>
           date
-          <input value={date} onChange={(e) => setDate(e.target.value)} />
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </label>
+        <div>
+          <label>visibility</label>
+          {visibilityOptions.map((option) => (
+            <label key={option}>
+              <input
+                type="radio"
+                value={option}
+                required
+                checked={visibility === option}
+                onChange={() => setVisibility(option)}
+              />
+              {option}
+            </label>
+          ))}
         </div>
         <div>
-          visibility
-          <input
-            value={visibility}
-            onChange={(e) => setVisibility(e.target.value as Visibility)}
-          />
-        </div>
-        <div>
-          weather
-          <input
-            value={weather}
-            onChange={(e) => setWeather(e.target.value as Weather)}
-          />
+          <label>weather</label>
+          {weatherOptions.map((op) => (
+            <label key={op}>
+              <input
+                type="radio"
+                value={op}
+                onChange={() => setWeather(op)}
+                checked={weather === op}
+                required
+              />
+              {op}
+            </label>
+          ))}
         </div>
         <div>
           comment
