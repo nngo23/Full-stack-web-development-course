@@ -94,7 +94,7 @@ const data = [
         type: "OccupationalHealthcare",
         specialist: "MD Yan",
         employerName: "Pino",
-        diagnosisCodes: ["Z57.1", "Z74.3", "M51.2"],
+        diagnoseCodes: ["Z57.1", "Z74.3", "M51.2"],
         description: "Little radiation poisoning. ",
         sickLeave: {
           startDate: "2015-05-05",
@@ -116,7 +116,7 @@ const data = [
         date: "2019-01-08",
         type: "Hospital",
         specialist: "MD Yan",
-        diagnosisCodes: ["S62.5"],
+        diagnoseCodes: ["S62.5"],
         description:
           "Healing time appr. 3 weeks. patient doesn't remember how he got injured.",
         discharge: {

@@ -35,13 +35,25 @@ const PatientPage = ({ patient, setPatient }: Props) => {
 
       <div>ssn: {patient.ssn}</div>
       <div>occupation: {patient.occupation}</div>
-      <h3>Entries</h3>
+      <h3>entries</h3>
       {patient.entries.length === 0 ? (
         <p>No entries found</p>
       ) : (
         <ul>
-          {patient.entries.map((entry, index) => (
-            <li key={index}>Entry</li>
+          {patient.entries.map((entry) => (
+            <div key={entry.id}>
+              <p>
+                {" "}
+                {entry.date} {entry.description}
+              </p>
+              {entry.diagnoseCodes && (
+                <ul>
+                  {entry.diagnoseCodes.map((code) => (
+                    <li key={code}>{code}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
           ))}
         </ul>
       )}
