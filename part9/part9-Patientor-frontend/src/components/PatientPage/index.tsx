@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Patient } from "../../types";
 import patients from "../../services/patients";
 import { GenderIcons } from "../GenderIcons";
@@ -11,7 +10,6 @@ interface Props {
 }
 
 const PatientPage = ({ patient, setPatient }: Props) => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
@@ -30,15 +28,7 @@ const PatientPage = ({ patient, setPatient }: Props) => {
   }
 
   return (
-    <div className="App">
-      <Box>
-        <Typography align="left">
-          <h1>Patientor</h1>
-        </Typography>
-      </Box>
-      <Button variant="contained" onClick={() => navigate("/")}>
-        Home
-      </Button>
+    <div>
       <h2>
         {patient.name} <GenderIcons gender={patient.gender} />
       </h2>
