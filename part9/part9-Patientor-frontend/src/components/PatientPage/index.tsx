@@ -43,7 +43,6 @@ const PatientPage = ({ patient, setPatient }: Props) => {
           {patient.entries.map((entry) => (
             <div key={entry.id}>
               <p>
-                {" "}
                 {entry.date} {entry.description}
               </p>
               {entry.diagnoseCodes && (
