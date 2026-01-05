@@ -1,5 +1,50 @@
-import { Patient } from "../types/patient";
-import { toNewPatientEntry } from "../utils/utils";
+import { Patient, Gender, Entry, EntryType } from "../types/patient";
+
+const mapGender = (g: string): Gender => {
+  switch (g.toLowerCase()) {
+    case "male":
+      return Gender.Male;
+    case "female":
+      return Gender.Female;
+    case "other":
+      return Gender.Other;
+    default:
+      throw new Error(`Unknown gender: ${g}`);
+  }
+};
+
+const isObject = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+const mapEntry = (e: unknown): Entry => {
+  if (!isObject(e) || !("type" in e)) {
+    throw new Error("Invalid entry");
+  }
+
+  switch (e.type) {
+    case "Hospital":
+      return {
+        ...e,
+        type: EntryType.Hospital,
+      } as Entry;
+
+    case "OccupationalHealthcare":
+      return {
+        ...e,
+        type: EntryType.OccupationalHealthcare,
+      } as Entry;
+
+    case "HealthCheck":
+      return {
+        ...e,
+        type: EntryType.HealthCheck,
+      } as Entry;
+
+    default:
+      throw new Error(`Unhandled entry type: ${String(e.type)}`);
+  }
+};
 
 const data = [
   {
@@ -9,7 +54,31 @@ const data = [
     ssn: "090786-122X",
     gender: "male",
     occupation: "New york city cop",
-    entries: [],
+    entries: [
+      {
+        id: "a1",
+        date: "2023-04-20",
+        type: "Hospital",
+        specialist: "Dr. Bob",
+        description: "Covid",
+        discharge: {
+          date: "2023-04-25",
+          criteria: "Has healed",
+        },
+      },
+      {
+        id: "a2",
+        date: "2023-09-10",
+        type: "OccupationalHealthcare",
+        specialist: "Dr. Paul",
+        description: "Stomach treatment",
+        employerName: "XYZ Corp",
+        sickLeave: {
+          startDate: "2023-09-10",
+          endDate: "2023-09-28",
+        },
+      },
+    ],
   },
   {
     id: "d2773598-f723-11e9-8f0b-362b9e155667",
@@ -18,7 +87,21 @@ const data = [
     ssn: "300179-77A",
     gender: "male",
     occupation: "Cop",
-    entries: [],
+    entries: [
+      {
+        id: "fcd59fa6-c4b5-4fec-ac4d-df4fe1f85f34",
+        date: "2015-05-05",
+        type: "OccupationalHealthcare",
+        specialist: "MD Yan",
+        employerName: "Pino",
+        diagnosisCodes: ["Z57.1", "Z74.3", "M51.2"],
+        description: "Little radiation poisoning. ",
+        sickLeave: {
+          startDate: "2015-05-05",
+          endDate: "2015-05-15",
+        },
+      },
+    ],
   },
   {
     id: "d27736ec-f723-11e9-8f0b-362b9e155667",
@@ -27,7 +110,21 @@ const data = [
     ssn: "250470-555L",
     gender: "other",
     occupation: "Technician",
-    entries: [],
+    entries: [
+      {
+        id: "d811e46d-70b3-4d90-b090-4535c7cf8fb4",
+        date: "2019-01-08",
+        type: "Hospital",
+        specialist: "MD Yan",
+        diagnosisCodes: ["S62.5"],
+        description:
+          "Healing time appr. 3 weeks. patient doesn't remember how he got injured.",
+        discharge: {
+          date: "2019-01-29",
+          criteria: "Healing well.",
+        },
+      },
+    ],
   },
   {
     id: "d2773822-f723-11e9-8f0b-362b9e155667",
@@ -49,10 +146,12 @@ const data = [
   },
 ];
 
-const patientData: Patient[] = data.map((obj) => {
-  const item = toNewPatientEntry(obj) as Patient;
-  item.id = obj.id;
-  return item;
+const patientData: Patient[] = data.map((p) => {
+  return {
+    ...p,
+    gender: mapGender(p.gender),
+    entries: p.entries.map(mapEntry),
+  };
 });
 
 export default patientData;
