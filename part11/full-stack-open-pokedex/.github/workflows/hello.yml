@@ -1,9 +1,12 @@
 name: Hello World
 
+# Trigger on any push to any branch
 on: push
 
 jobs:
   hello:
     runs-on: ubuntu-latest
+
     steps:
-      - run: echo "Hello World!"
+      - name: Say hello
+        run: echo "Hello World!"
