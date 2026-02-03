@@ -1,46 +1,49 @@
-const bcrypt = require('bcrypt')
-const usersRouter = require('express').Router()
-const User = require('../models/user')
+const usersRouter = require("express").Router();
 
-const validateUser = (username, password) => {
-  if (!username || username.length < 3) {
-    return 'Username must be required and have at least 3 characters'
+const { User, Blog } = require("../models");
+
+usersRouter.get("/", async (req, res) => {
+  const users = await User.findAll({
+    include: {
+      model: Blog,
+      attributes: { exclude: ["userId"] },
+    },
+  });
+  res.json(users);
+});
+
+usersRouter.post("/", async (req, res, next) => {
+  try {
+    const { username, name } = req.body;
+
+    if (!username || !name) {
+      const error = new Error("username and name are required");
+      error.name = "ValidationError";
+      throw error;
+    }
+
+    const user = await User.create({ username, name });
+    res.json(user);
+  } catch (error) {
+    next(error);
   }
-  if (!password || password.length < 3) {
-    return 'Password must be required and have at least 3 characters'
+});
+
+usersRouter.put("/:username", async (req, res, next) => {
+  try {
+    const user = await User.findOne({
+      where: { username: req.params.username },
+    });
+    if (!user) {
+      const error = new Error("user not found");
+      error.name = "NotFoundError";
+      throw error;
+    }
+    await user.update(req.body);
+    res.json(user);
+  } catch (error) {
+    next(error);
   }
-  return ''
-}
+});
 
-usersRouter.get('/', async (req, res) => {
-  const users = await User.find({}).populate('blogs', { url: 1, title: 1, author: 1 })
-  res.json(users)
-})
-
-usersRouter.post('/', async (req, res, next) => {
-  const { username, name, password } = req.body
-
-  const validationError = validateUser(username, password)
-  if (validationError) return res.status(400).json({ error: validationError })
-
-  const presentUser = await User.findOne({ username })
-  if (presentUser) return res.status(400).json({ error: 'Username must be unique' })
-
-  const passwordHash = await bcrypt.hash(password, 10)
-  const user = new User({ username, name, passwordHash })
-
-  user.save()
-    .then(savedUser => res.status(201).json(savedUser))
-    .catch(error => {
-      if (error.name === 'ValidationError') res.status(400).json({ error: error.message })
-      else next(error)
-    })
-})
-
-usersRouter.delete('/:id', async (req, res) => {
-    await User.findByIdAndDelete(req.params.id)
-    res.status(204).end()
-      
-})
-
-module.exports = usersRouter
+module.exports = usersRouter;
