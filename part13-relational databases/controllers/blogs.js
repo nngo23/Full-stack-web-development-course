@@ -5,7 +5,7 @@ const userExtractor = require("../middleware/userExtractor");
 const tokenExtractor = require("../middleware/tokenExtractor");
 const { Op } = require("sequelize");
 
-blogsRouter.get("/", async (request, response) => {
+blogsRouter.get("/", async (request, response, next) => {
   try {
     const where = {};
 
@@ -46,9 +46,9 @@ blogsRouter.get("/:id", blogFinder, async (req, res) => {
   res.json(req.blog);
 });
 
-blogsRouter.post("/", userExtractor, tokenExtractor, async (req, res) => {
+blogsRouter.post("/", userExtractor, tokenExtractor, async (req, res, next) => {
   try {
-    const { title, author, url, likes } = req.body;
+    const { title, author, url, likes, year } = req.body;
 
     if (!title || !url) {
       const error = new Error("title and url are required");
@@ -68,6 +68,7 @@ blogsRouter.post("/", userExtractor, tokenExtractor, async (req, res) => {
       url,
       likes: likes || 0,
       userId: req.user.id,
+      year,
     });
     res.status(201).json(newBlog);
   } catch (error) {
@@ -80,7 +81,7 @@ blogsRouter.delete(
   blogFinder,
   tokenExtractor,
   userExtractor,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "token missing or invalid" });
@@ -98,17 +99,27 @@ blogsRouter.delete(
   },
 );
 
-blogsRouter.put("/:id", blogFinder, async (request, response) => {
-  if (typeof request.body.likes !== "number") {
-    const error = new Error("likes must be a number");
-    error.name = "ValidationError";
-    throw error;
-  }
+blogsRouter.put(
+  "/:id",
+  blogFinder,
+  tokenExtractor,
+  userExtractor,
+  async (request, response, next) => {
+    try {
+      if (typeof request.body.likes !== "number") {
+        const error = new Error("likes must be a number");
+        error.name = "ValidationError";
+        throw error;
+      }
 
-  request.blog.likes = request.body.likes;
-  await request.blog.save();
+      request.blog.likes = request.body.likes;
+      await request.blog.save();
 
-  response.json(request.blog);
-});
+      response.json(request.blog);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 module.exports = blogsRouter;

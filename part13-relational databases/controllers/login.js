@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const loginRouter = require("express").Router();
-const { User } = require("../models");
+const { User, Session } = require("../models");
 
 loginRouter.post("/", async (req, res, next) => {
   try {
@@ -13,10 +12,8 @@ loginRouter.post("/", async (req, res, next) => {
       },
     });
 
-    if (!user) {
-      const error = new Error("invalid username or password");
-      error.name = "ValidationError";
-      throw error;
+    if (!user || user.disabled) {
+      return res.status(401).json({ error: "invalid credentials" });
     }
 
     const userForToken = {
@@ -27,7 +24,7 @@ loginRouter.post("/", async (req, res, next) => {
     const token = jwt.sign(userForToken, process.env.JWT_SECRET, {
       expiresIn: 60 * 60,
     });
-
+    await Session.create({ userId: user.id, token: token });
     res.status(200).send({ token, username: user.username, name: user.name });
   } catch (err) {
     next(err);
