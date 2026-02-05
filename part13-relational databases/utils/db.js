@@ -26,8 +26,7 @@ const connectToDB = async () => {
 
   return null;
 };
-
-const migrationConf = {
+const migrationConfiguration = {
   migrations: {
     glob: "migrations/*.js",
   },
@@ -35,18 +34,17 @@ const migrationConf = {
   context: sequelize.getQueryInterface(),
   logger: console,
 };
-
 const runMigrations = async () => {
-  const migrator = new Umzug(migrationConf);
-  const migrations = await migrator.up();
+  const umzug = new Umzug(migrationConfiguration);
+  const migrations = await umzug.up();
   console.log("Migrations up to date", {
-    files: migrations.map((mig) => mig.name),
+    files: migrations.map((m) => m.name),
   });
 };
-const rollbackMigration = async () => {
+const revertLastMigration = async () => {
   await sequelize.authenticate();
-  const migrator = new Umzug(migrationConf);
-  await migrator.down();
+  const umzug = new Umzug(migrationConfiguration);
+  await umzug.down();
 };
 
-module.exports = { sequelize, connectToDB, rollbackMigration };
+module.exports = { sequelize, connectToDB, revertLastMigration };
